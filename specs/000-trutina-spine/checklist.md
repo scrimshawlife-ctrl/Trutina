@@ -1,14 +1,14 @@
 # Checklist — Trutina 000
 
-- [ ] Constitution ratified on main
-- [ ] Packet schema `brier.score.v0` on disk
-- [ ] SCORE refuses forecast_request
-- [ ] SCORE refuses VOID
-- [ ] SCORE refuses slang_atom / tradition_atom / route_atom
-- [ ] SCORE on (0.8, 1) = 0.04
-- [ ] SCORE on (0.8, 0) = 0.64
-- [ ] `forecast_eligible` never true
-- [ ] `can_promote` never true
-- [ ] Spec 009 R004B still lists `abx.brier`
-- [ ] No Hub upload
-- [ ] No train job
+- [x] Constitution ratified on main
+- [x] Packet schema `brier.score.v0` on disk
+- [x] SCORE refuses forecast_request
+- [x] SCORE refuses VOID
+- [x] SCORE refuses slang_atom / tradition_atom / route_atom
+- [x] SCORE on (0.8, 1) = 0.04
+- [x] SCORE on (0.8, 0) = 0.64
+- [x] `forecast_eligible` never true
+- [x] `can_promote` never true
+- [x] Spec 009 R004B still lists `abx.brier`
+- [x] No Hub upload
+- [x] No train job
