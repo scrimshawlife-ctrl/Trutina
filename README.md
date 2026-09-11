@@ -1,34 +1,23 @@
-# brier
+# Trutina
 
-Brier scoring functions for the Abraxas model stack.
+SHADOW calibration specialist for the Abraxas stack. Assay, not minds.
 
-Provides telemetry-grade accuracy scoring (Brier score) for settled forecasts, 
-integrated with Abraxas skill evolution and Hyperlex.
+Specialist id on Spec 009 is `abx.brier`. Display name is Trutina. Function slice is `trutina.score`. Packet is `brier.score.v0`. Home is `yggdrasil.replay`.
 
-## Spec
+One formula: `BRIER_BINARY_V1` = (p − y)². Unsettled `forecast_request` stays R004 `NOT_COMPUTABLE`. Settled pairs take R004B.
 
-See [`specs/000-brier-spine/spec.md`](specs/000-brier-spine/spec.md) for the full specification.
+Does not train. Does not Hub. Does not replace `outcome_brier`.
 
-## Installation
+## Specs
+
+- [constitution.md](constitution.md)
+- [specs/000-trutina-spine](specs/000-trutina-spine)
+- [specs/001-score](specs/001-score)
+- [specs/000-brier-spine](specs/000-brier-spine) — derivative precursor
+
+## Install
 
 ```bash
 pip install -e ".[dev]"
-```
-
-## Usage
-
-```python
-from brier import compute_atomic_brier
-
-# Compute atomic Brier score
-score = compute_atomic_brier(expected_probability=0.7, observed_outcome=1)
-print(score)  # 0.09
-```
-
-## Development
-
-Run tests:
-
-```bash
 pytest -q
 ```
