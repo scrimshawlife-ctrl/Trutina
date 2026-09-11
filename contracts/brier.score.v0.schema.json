@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abraxas.local/contracts/trutina/brier.score.v0.schema.json",
+  "title": "brier.score.v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "specialist", "display", "mode", "brier", "honesty", "forecast_eligible", "can_promote", "weight_mutation"],
+  "properties": {
+    "schema": {"const": "brier.score.v0"},
+    "specialist": {"const": "abx.brier"},
+    "display": {"const": "Trutina"},
+    "mode": {"enum": ["SCORE", "BATCH", "DECOMPOSE", "FUSION_ADVISORY", "ROUTER_MICRO", "GATE_ADVISORY", "PROJECT"]},
+    "formula": {"const": "BRIER_BINARY_V1"},
+    "brier": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "honesty": {"enum": ["OBSERVED", "INFERRED", "SPECULATIVE", "NOT_COMPUTABLE"]},
+    "forecast_eligible": {"const": false},
+    "can_promote": {"const": false},
+    "weight_mutation": {"const": false},
+    "phenomenal": {"const": false},
+    "ledger_id": {"type": ["string", "null"]},
+    "failure": {"type": ["string", "null"]},
+    "corpus_ref": {"type": ["string", "null"]}
+  }
+}
