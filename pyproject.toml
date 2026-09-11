@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+version = "0.1.0"
+name = "brier"
+description = "Brier scoring functions for the Abraxas model stack"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "scrimshawlife-ctrl"}
+]
+keywords = ["brier", "scoring", "forecast", "abraxas", "hyperlex"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/scrimshawlife-ctrl/brier"
+
+[tool.setuptools.packages.find]
+where = ["src"]

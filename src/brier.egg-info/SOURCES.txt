@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+src/brier/__init__.py
+src/brier/core.py
+src/brier.egg-info/PKG-INFO
+src/brier.egg-info/SOURCES.txt
+src/brier.egg-info/dependency_links.txt
+src/brier.egg-info/top_level.txt
+tests/test_core.py
