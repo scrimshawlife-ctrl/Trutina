@@ -118,3 +118,10 @@ def test_unknown_mode_is_preserved_when_refused() -> None:
     assert pkt["mode"] == "UNKNOWN"
     assert pkt["failure"] == "NOT_COMPUTABLE"
     assert pkt["brier"] is None
+
+
+def test_empty_mode_is_preserved_when_refused() -> None:
+    pkt = score({**_settled(0.8, 1), "mode": ""})
+    assert pkt["mode"] == ""
+    assert pkt["failure"] == "NOT_COMPUTABLE"
+    assert pkt["brier"] is None

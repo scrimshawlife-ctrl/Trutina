@@ -37,7 +37,9 @@ def _base(*, mode: str, brier: float | None, honesty: str, failure: str | None, 
 def score(atom: dict[str, Any]) -> dict[str, Any]:
     """Score a settled forecast atom and return a `brier.score.v0` packet."""
     payload = atom.get("payload_class")
-    mode = atom.get("mode") or "SCORE"
+    mode = atom.get("mode")
+    if mode is None:
+        mode = "SCORE"
     ref = atom.get("corpus_ref")
 
     if mode in STUB_MODES:
