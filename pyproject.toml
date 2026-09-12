@@ -5,23 +5,23 @@ build-backend = "setuptools.build_meta"
 [project]
 version = "0.1.0"
 name = "brier"
-description = "Brier scoring functions for the Abraxas model stack"
+description = "Trutina kernel. abx.brier scoring for the Abraxas stack."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "MIT"}
-authors = [
-    {name = "scrimshawlife-ctrl"}
-]
-keywords = ["brier", "scoring", "forecast", "abraxas", "hyperlex"]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+authors = [{name = "Daniel Meyer"}]
+keywords = ["brier", "trutina", "abraxas"]
 dependencies = []
 
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
 [project.urls]
-Homepage = "https://github.com/scrimshawlife-ctrl/brier"
+Homepage = "https://github.com/scrimshawlife-ctrl/Trutina"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
