@@ -67,8 +67,6 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("boolean outcome")
         if isinstance(y, int):
             y_int = y
-        elif isinstance(y, float) and y in (0.0, 1.0):
-            y_int = int(y)
         else:
             raise ValueError("unsupported outcome type")
         if y_int not in (0, 1):

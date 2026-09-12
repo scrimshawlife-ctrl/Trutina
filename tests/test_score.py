@@ -94,6 +94,12 @@ def test_decimal_outcome_refused() -> None:
     assert pkt["brier"] is None
 
 
+def test_float_outcome_refused() -> None:
+    pkt = score(_settled(0.8, 1.0, settlement="TRUE"))
+    assert pkt["failure"] == "NOT_COMPUTABLE"
+    assert pkt["brier"] is None
+
+
 def test_settlement_outcome_mismatch_refused() -> None:
     pkt = score(_settled(0.8, 1, settlement="FALSE"))
     assert pkt["failure"] == "NOT_COMPUTABLE"
