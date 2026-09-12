@@ -35,6 +35,7 @@ def _base(*, mode: str, brier: float | None, honesty: str, failure: str | None, 
 
 
 def score(atom: dict[str, Any]) -> dict[str, Any]:
+    """Score a settled forecast atom and return a `brier.score.v0` packet."""
     payload = atom.get("payload_class")
     mode = atom.get("mode") or "SCORE"
     ref = atom.get("corpus_ref")
@@ -62,10 +63,15 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
     p = atom.get("p", atom.get("expected_probability"))
     y = atom.get("y", atom.get("observed_outcome"))
     try:
-        if isinstance(y, (bool, str)):
+        if isinstance(y, bool):
             raise ValueError("boolean outcome")
-        y_int = int(y)
-        if y_int not in (0, 1) or (isinstance(y, float) and y not in (0.0, 1.0)):
+        if isinstance(y, int):
+            y_int = y
+        elif isinstance(y, float) and y in (0.0, 1.0):
+            y_int = int(y)
+        else:
+            raise ValueError("unsupported outcome type")
+        if y_int not in (0, 1):
             raise ValueError("non-binary outcome")
         value = compute_atomic_brier(float(p), y_int)
     except (TypeError, ValueError):

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from brier.score import score
 
 
@@ -76,6 +78,12 @@ def test_boolean_outcome_refused() -> None:
 
 def test_string_outcome_refused() -> None:
     pkt = score(_settled(0.8, "1", settlement="TRUE"))
+    assert pkt["failure"] == "NOT_COMPUTABLE"
+    assert pkt["brier"] is None
+
+
+def test_decimal_outcome_refused() -> None:
+    pkt = score(_settled(0.8, Decimal("1"), settlement="TRUE"))
     assert pkt["failure"] == "NOT_COMPUTABLE"
     assert pkt["brier"] is None
 
