@@ -68,6 +68,12 @@ def test_non_binary_outcome_refused() -> None:
     assert pkt["brier"] is None
 
 
+def test_boolean_outcome_refused() -> None:
+    pkt = score(_settled(0.8, True, settlement="TRUE"))
+    assert pkt["failure"] == "NOT_COMPUTABLE"
+    assert pkt["brier"] is None
+
+
 def test_batch_stub() -> None:
     pkt = score({**_settled(0.8, 1), "mode": "BATCH"})
     assert pkt["mode"] == "BATCH"

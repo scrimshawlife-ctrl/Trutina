@@ -62,6 +62,8 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
     p = atom.get("p", atom.get("expected_probability"))
     y = atom.get("y", atom.get("observed_outcome"))
     try:
+        if isinstance(y, bool):
+            raise ValueError("boolean outcome")
         y_int = int(y)
         if y_int not in (0, 1) or (isinstance(y, float) and y not in (0.0, 1.0)):
             raise ValueError("non-binary outcome")
