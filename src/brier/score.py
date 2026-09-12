@@ -42,7 +42,7 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
     if mode in STUB_MODES:
         return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
     if mode not in LIVE_MODES:
-        return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
+        return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
 
     if payload == "forecast_request":
         return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
@@ -62,7 +62,7 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
     p = atom.get("p", atom.get("expected_probability"))
     y = atom.get("y", atom.get("observed_outcome"))
     try:
-        if isinstance(y, bool):
+        if isinstance(y, (bool, str)):
             raise ValueError("boolean outcome")
         y_int = int(y)
         if y_int not in (0, 1) or (isinstance(y, float) and y not in (0.0, 1.0)):
