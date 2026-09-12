@@ -49,7 +49,7 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
         return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
     if payload in OTHER_ATOMS:
         return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="SPECIALIST_LANE_VIOLATION", corpus_ref=ref)
-    if payload not in (None, "settled_forecast"):
+    if payload != "settled_forecast":
         return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="SPECIALIST_LANE_VIOLATION", corpus_ref=ref)
 
     settlement = atom.get("settlement")
@@ -73,6 +73,9 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("unsupported outcome type")
         if y_int not in (0, 1):
             raise ValueError("non-binary outcome")
+        expected_y = 1 if settlement == "TRUE" else 0
+        if y_int != expected_y:
+            raise ValueError("settlement mismatch")
         value = compute_atomic_brier(float(p), y_int)
     except (TypeError, ValueError):
         return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)

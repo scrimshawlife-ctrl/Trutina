@@ -53,6 +53,12 @@ def test_slang_refused() -> None:
     assert pkt["failure"] == "SPECIALIST_LANE_VIOLATION"
 
 
+def test_missing_payload_class_refused() -> None:
+    pkt = score({"p": 0.8, "y": 1, "settlement": "TRUE", "settled_by": "operator"})
+    assert pkt["failure"] == "SPECIALIST_LANE_VIOLATION"
+    assert pkt["brier"] is None
+
+
 def test_missing_settled_by() -> None:
     pkt = score({"payload_class": "settled_forecast", "p": 0.8, "y": 1, "settlement": "TRUE"})
     assert pkt["failure"] == "NOT_COMPUTABLE"
@@ -84,6 +90,12 @@ def test_string_outcome_refused() -> None:
 
 def test_decimal_outcome_refused() -> None:
     pkt = score(_settled(0.8, Decimal("1"), settlement="TRUE"))
+    assert pkt["failure"] == "NOT_COMPUTABLE"
+    assert pkt["brier"] is None
+
+
+def test_settlement_outcome_mismatch_refused() -> None:
+    pkt = score(_settled(0.8, 1, settlement="FALSE"))
     assert pkt["failure"] == "NOT_COMPUTABLE"
     assert pkt["brier"] is None
 
