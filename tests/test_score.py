@@ -56,6 +56,18 @@ def test_missing_settled_by() -> None:
     assert pkt["failure"] == "NOT_COMPUTABLE"
 
 
+def test_missing_settlement_refused() -> None:
+    pkt = score({"payload_class": "settled_forecast", "p": 0.8, "y": 1, "settled_by": "operator"})
+    assert pkt["failure"] == "NOT_COMPUTABLE"
+    assert pkt["brier"] is None
+
+
+def test_non_binary_outcome_refused() -> None:
+    pkt = score(_settled(0.8, 2, settlement="TRUE"))
+    assert pkt["failure"] == "NOT_COMPUTABLE"
+    assert pkt["brier"] is None
+
+
 def test_batch_stub() -> None:
     pkt = score({**_settled(0.8, 1), "mode": "BATCH"})
     assert pkt["mode"] == "BATCH"

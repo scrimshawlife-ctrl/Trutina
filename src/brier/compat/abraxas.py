@@ -1,1 +1,9 @@
-# Abraxas-specific shape mappers\n\ndef to_brier_score_packet():\n    pass\n\ndef to_brier_ledger_entry():\n    pass
+# Abraxas-specific shape mappers
+
+
+def to_brier_score_packet():
+    pass
+
+
+def to_brier_ledger_entry():
+    pass

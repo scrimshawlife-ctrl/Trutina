@@ -54,7 +54,7 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
     settlement = atom.get("settlement")
     if settlement == "VOID":
         return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
-    if settlement not in ("TRUE", "FALSE", None):
+    if settlement not in ("TRUE", "FALSE"):
         return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
     if not atom.get("settled_by"):
         return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
@@ -62,7 +62,10 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
     p = atom.get("p", atom.get("expected_probability"))
     y = atom.get("y", atom.get("observed_outcome"))
     try:
-        value = compute_atomic_brier(float(p), int(y))
+        y_int = int(y)
+        if y_int not in (0, 1) or (isinstance(y, float) and y not in (0.0, 1.0)):
+            raise ValueError("non-binary outcome")
+        value = compute_atomic_brier(float(p), y_int)
     except (TypeError, ValueError):
         return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
 
