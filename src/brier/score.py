@@ -45,19 +45,19 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
         return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
 
     if payload == "forecast_request":
-        return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
+        return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
     if payload in OTHER_ATOMS:
-        return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="SPECIALIST_LANE_VIOLATION", corpus_ref=ref)
+        return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="SPECIALIST_LANE_VIOLATION", corpus_ref=ref)
     if payload not in (None, "settled_forecast"):
-        return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="SPECIALIST_LANE_VIOLATION", corpus_ref=ref)
+        return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="SPECIALIST_LANE_VIOLATION", corpus_ref=ref)
 
     settlement = atom.get("settlement")
     if settlement == "VOID":
-        return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
+        return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
     if settlement not in ("TRUE", "FALSE"):
-        return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
+        return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
     if not atom.get("settled_by"):
-        return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
+        return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
 
     p = atom.get("p", atom.get("expected_probability"))
     y = atom.get("y", atom.get("observed_outcome"))
@@ -69,6 +69,6 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("non-binary outcome")
         value = compute_atomic_brier(float(p), y_int)
     except (TypeError, ValueError):
-        return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
+        return _base(mode=mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
 
-    return _base(mode="SCORE", brier=value, honesty="OBSERVED", failure=None, corpus_ref=ref)
+    return _base(mode=mode, brier=value, honesty="OBSERVED", failure=None, corpus_ref=ref)
