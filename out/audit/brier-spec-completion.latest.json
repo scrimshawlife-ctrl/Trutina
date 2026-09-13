@@ -1,0 +1,45 @@
+{
+  "surface": "Projection",
+  "status": "SHADOW_SPECIFICATION_COMPLETE",
+  "BOUNDARY": "Documentation only. This does not govern or activate.",
+  "EVIDENCE PACKET": {
+    "repository": "https://github.com/scrimshawlife-ctrl/Trutina",
+    "observed_base_commit": "2724c9baf6e5837441f65e569347c8e713a2a32e",
+    "research_cutoff": "2026-09-12",
+    "research_sources": 15,
+    "live_modes_observed": ["SCORE"],
+    "workflow": "Trutina constitution, bind receipt and normal PR/review workflow",
+    "notion_alignment": "NOT_COMPUTABLE: live designated Spec 010 and Spec 009 contents not verified",
+    "provenance_revision": "2026-09-13: repository-specific provenance corrected per operator scope clarification; original revision preserved in git history",
+    "review_resolution": "2026-09-13: specified cutoff snapshot evidence, terminal timing requirements, late-settlement handling and the SETTLED/VOID/UNSETTLED member union; review baseline 8687910fc4956df665efa3c00d0ed2e618b7298c"
+  },
+  "TASK": "Complete the Brier module specification in place against repository conventions and current research.",
+  "OUTPUT EXPECTED": {
+    "behavioral_chain": "Journey -> Workflow -> State Transition -> Contract -> Acceptance Test -> Implementation Task",
+    "acceptance_cases": 28,
+    "implementation_tasks": 6,
+    "files": [
+      {"path": "specs/000-trutina-spine/spec.md", "sha256": "c75222953bd2e5aee49d97a2d2e24800cd596c6bf0b77418f27c55ad60a49616"},
+      {"path": "specs/001-score/spec.md", "sha256": "417d6af5ea66cbf1f5a2166b965aa6c7cc5d52739235313a009841e1ad403bc9"},
+      {"path": "specs/000-brier-spine/spec.md", "sha256": "3cc364b547281bf696942ce9c88e12c3b8f7e4128a684c414c40df8675ada9c1"}
+    ],
+    "hash_scope": "SHA-256 of raw UTF-8 file bytes with LF newlines; this receipt does not hash itself"
+  },
+  "VALIDATION": {
+    "git_diff_check": "PASS",
+    "relative_markdown_links": {"status": "PASS", "count": 5},
+    "fenced_blocks": "PASS: balanced",
+    "score_json_example": "PASS: parsed and checked against every keyword used by the present output schema; not a general JSON Schema engine",
+    "arithmetic_examples": {"status": "PASS", "count": 20},
+    "scope": "Three existing specification files plus this receipt; no runtime, schema, dependency or constitution change",
+    "runtime_acceptance": "NOT_RUN: specification-only revision; future acceptance cases are requirements, not current implementation passes"
+  },
+  "RESIDUAL RISKS": [
+    "NOT_COMPUTABLE: live designated Spec 009/010 parity",
+    "NOT_COMPUTABLE: external receipt authenticity and adapter behavior",
+    "NOT_COMPUTABLE: corpus baseline, sampling/dependence design and empirical confidence coverage",
+    "OBSERVED: SCORE validation gaps remain for T01 implementation"
+  ],
+  "RECOMMENDED NEXT ADVISORY ACTION": "Review against live Spec 010, then implement T01 strict SCORE validation within the existing mode.",
+  "provenance_footer": "Provenance: scrimshawlife-ctrl/Trutina + constitution.md + specs/BIND.md + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline)"
+}
