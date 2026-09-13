@@ -9,7 +9,7 @@ def test_compute_atomic_brier():
     assert compute_atomic_brier(1.0, 0) == 1.0
     assert compute_atomic_brier(0.0, 1) == 1.0
     # Example from spec
-    assert compute_atomic_brier(0.7, 1) == 0.09
+    assert compute_atomic_brier(0.7, 1) == pytest.approx(0.09, abs=1e-12, rel=1e-12)
 
 def test_compute_atomic_brier_invalid():
     with pytest.raises(ValueError):

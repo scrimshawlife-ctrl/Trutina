@@ -1,3 +1,4 @@
+import pytest
 from brier.score import score
 
 
@@ -19,7 +20,7 @@ def test_score_true_08() -> None:
     assert pkt["display"] == "Trutina"
     assert pkt["mode"] == "SCORE"
     assert pkt["formula"] == "BRIER_BINARY_V1"
-    assert pkt["brier"] == 0.04
+    assert pkt["brier"] == pytest.approx(0.04, abs=1e-12, rel=1e-12)
     assert pkt["honesty"] == "OBSERVED"
     assert pkt["forecast_eligible"] is False
     assert pkt["can_promote"] is False
@@ -30,7 +31,7 @@ def test_score_true_08() -> None:
 
 def test_score_false_08() -> None:
     pkt = score(_settled(0.8, 0, settlement="FALSE"))
-    assert pkt["brier"] == 0.64
+    assert pkt["brier"] == pytest.approx(0.64, abs=1e-12, rel=1e-12)
 
 
 def test_forecast_request_refused() -> None:
