@@ -1,0 +1,72 @@
+{
+  "surface": "Execution / advisory engineering",
+  "status": "LOCAL_PASS",
+  "BOUNDARY": "T01 strict SCORE validation only. No new mode, schema, kernel, production, ledger or Notion mutation.",
+  "EVIDENCE PACKET": {
+    "repository": "https://github.com/scrimshawlife-ctrl/Trutina",
+    "specification_commit": "ecbf403fa45a61c43ce17e2d84f82891392813fd",
+    "specification_pr": 5,
+    "observed_import_prerequisite": "At the specification baseline, executing the ledger/compatibility modules defines none of the three names imported by brier.__init__; literal backslash-n comment text is the cause.",
+    "graph_discovery": "Trutina is not indexed; inspected known repository files directly."
+  },
+  "TASK": "Implement strict SCORE input validation and semantic output tests for A01-A09 and binary refusal in A24.",
+  "OUTPUT EXPECTED": {
+    "files": [
+      {
+        "path": "pyproject.toml",
+        "sha256": "029380944dc82d598b572f2ef02cf03304430ab91e1dd0cdbd120dc40b0232b7"
+      },
+      {
+        "path": "specs/001-score/engineering.md",
+        "sha256": "e9ad50db32f50847db8b622fa894a150774c15484ab7a94626e95e5772c17fda"
+      },
+      {
+        "path": "src/brier/score.py",
+        "sha256": "11893f2c87739433d7f9ed6968447cdb3ac2e848c5d6a7d483ca5f0e162863ba"
+      },
+      {
+        "path": "src/brier/ledger.py",
+        "sha256": "13f19fe01e43107b7fb1400bc1611e9e3a39a7946df2acfc76914ada1ea6f842"
+      },
+      {
+        "path": "src/brier/compat/abraxas.py",
+        "sha256": "23a89514dca40c1e0c9e6b35bdc27b9c7047288cc44a35aeab0b38fd48224924"
+      },
+      {
+        "path": "tests/test_core.py",
+        "sha256": "860a9fe8f80e024f8f29cfe6791e5fe90d1b61f9891a2bd60ba3684a592cf2f5"
+      },
+      {
+        "path": "tests/test_score.py",
+        "sha256": "79828bf44ed52cf647d217b2ea53c634a6bf8668734a0844dc606f36b48b5b47"
+      },
+      {
+        "path": "tests/test_score_contract.py",
+        "sha256": "1d0e889da7a3136063736ddbb1f547295a7920f0325c14f7cd1b2b38cc264d08"
+      }
+    ],
+    "hash_scope": "SHA-256 of raw UTF-8 LF file bytes; receipt excludes itself",
+    "implemented": "Native numeric validation, alias consistency, explicit payload/settlement, outcome agreement, optional timestamp/reference checks, refusal precedence, output sanitization and deterministic packet behavior.",
+    "prerequisite_repair": "Define the three existing deferred exports as explicit NotImplementedError stubs; no adapter conversion or ledger emission.",
+    "test_dependency": "jsonschema>=4 in dev extra only"
+  },
+  "VALIDATION": {
+    "command": "python -B -m pytest -q -p no:cacheprovider tests/test_score_contract.py tests/test_score.py tests/test_core.py",
+    "result": "142 passed",
+    "python": "3.12.14",
+    "pytest": "9.1.1",
+    "jsonschema": "4.26.0",
+    "output_schema": "Draft202012Validator validates all new contract test packets; semantic invariants and strict JSON serialization additionally checked",
+    "git_diff_check": "PASS",
+    "kernel_schema_constitution": "UNCHANGED",
+    "external_ci": "NOT_COMPUTABLE: no hosted check result claimed"
+  },
+  "RESIDUAL RISKS": [
+    "NOT_COMPUTABLE: external receipt authenticity and live designated Spec 009/010 parity",
+    "Python 3.10/3.11 compatibility was not executed; verification used 3.12.14",
+    "Specification PR #5 remains draft and unmerged; implementation is stacked on its branch",
+    "BATCH, DECOMPOSE and remaining modes stay closed"
+  ],
+  "RECOMMENDED NEXT ADVISORY ACTION": "Review specification PR #5 and the stacked T01 implementation; merge remains operator-gated.",
+  "provenance_footer": "Provenance: scrimshawlife-ctrl/Trutina + Spec 001 / T01 + Hash: ecbf403fa45a61c43ce17e2d84f82891392813fd (specification baseline)"
+}
