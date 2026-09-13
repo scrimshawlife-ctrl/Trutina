@@ -97,4 +97,4 @@ python -m brier compute 0.7 1 --settled-by human
 pytest -q
 ```
 
-Provenance: Notion Sprint 001 Hub (live alignment NOT_COMPUTABLE) + Loop 805 Slice NOT_COMPUTABLE + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline; historical body preserved).
+Provenance: scrimshawlife-ctrl/Trutina + specs/BIND.md + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline; historical body preserved).

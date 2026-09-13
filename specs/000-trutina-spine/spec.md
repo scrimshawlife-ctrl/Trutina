@@ -32,9 +32,9 @@ OBSERVED repository baseline: `2724c9baf6e5837441f65e569347c8e713a2a32e` (2026-0
 | `src/brier/compat/abraxas.py`, `src/brier/ledger.py` | Placeholder text exists; working adapters/ledger emission cannot be claimed |
 | `specs/000-brier-spine/spec.md` | Preserved derivative precursor, with older packet/API examples; not the live contract |
 | `tests/test_core.py`, `tests/test_score.py` | Limited arithmetic and refusal fixtures exist; coverage does not establish the stronger acceptance requirements below |
-| Repository inventory | No repository AGENTS/CONTEXT file, documentation validator, governance-loop script or `docs/START_HERE.md` found; README is existing navigation |
+| Repository inventory | No repository AGENTS/CONTEXT file or documentation validator found; README is existing navigation |
 
-Notion Spec 010 and Spec 009 R004B are referenced by the repository bind receipt. Their live contents, Sprint 001 alignment and an assigned Loop 805 slice are NOT_COMPUTABLE from this checkout. No reconciliation or live Notion consistency is claimed. Older milestone/model-card wording is not proof of current implementation; source inspection establishes the live-mode inventory above.
+Notion Spec 010 and Spec 009 R004B are referenced by the repository bind receipt. Their live contents are NOT_COMPUTABLE from this checkout; live Notion consistency is not claimed. Trutina follows its own constitution, bind receipt and normal PR/review workflow. Older milestone/model-card wording is not proof of current implementation; source inspection establishes the live-mode inventory above.
 
 ## TASK
 
@@ -239,7 +239,7 @@ For this documentation revision, validate only Markdown links, embedded examples
 
 ## RESIDUAL RISKS
 
-NOT_COMPUTABLE: live Notion parity, assigned Sprint/Loop slice, upstream receipt authentication, production data quality/prevalence, external adapter behavior, corpus-specific baseline, dependence/block-length choice, valid confidence coverage and performance capacity. These require evidence not present in the repository. No external repository import, ledger append or runtime activation is implied.
+NOT_COMPUTABLE: live Spec 009/010 parity, upstream receipt authentication, production data quality/prevalence, external adapter behavior, corpus-specific baseline, dependence/block-length choice, valid confidence coverage and performance capacity. These require evidence not present in the repository. No external repository import, ledger append or runtime activation is implied.
 
 ## RECOMMENDED NEXT ADVISORY ACTION
 
@@ -281,4 +281,4 @@ Every packet carries OBSERVED / INFERRED / SPECULATIVE / NOT_COMPUTABLE. SCORE o
 
 `specs/000-brier-spine` is derivative. Do not delete. Do not treat it as the live spine.
 
-Provenance: Notion Sprint 001 Hub (live alignment NOT_COMPUTABLE) + Loop 805 Slice NOT_COMPUTABLE + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline; not a Notion or document-content hash).
+Provenance: scrimshawlife-ctrl/Trutina + constitution.md + specs/BIND.md (designated Spec 009/010 references; live parity unverified) + Research cutoff: 2026-09-12 + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline; not a Notion or document-content hash).

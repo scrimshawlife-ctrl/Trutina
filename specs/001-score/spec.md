@@ -116,4 +116,4 @@ NOT_COMPUTABLE: external receipt authenticity and live Notion parity. Current wr
 
 Implement T01 against these fixtures in the existing SCORE cycle, without opening new modes or changing packet schema.
 
-Provenance: Notion Sprint 001 Hub (live alignment NOT_COMPUTABLE) + Loop 805 Slice NOT_COMPUTABLE + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline).
+Provenance: scrimshawlife-ctrl/Trutina + constitution.md + specs/BIND.md (designated Spec 009/010 references; live parity unverified) + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline).
