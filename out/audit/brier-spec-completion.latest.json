@@ -1,0 +1,44 @@
+{
+  "surface": "Projection",
+  "status": "SHADOW_SPECIFICATION_COMPLETE",
+  "BOUNDARY": "Documentation only. This does not govern or activate.",
+  "EVIDENCE PACKET": {
+    "repository": "https://github.com/scrimshawlife-ctrl/Trutina",
+    "observed_base_commit": "2724c9baf6e5837441f65e569347c8e713a2a32e",
+    "research_cutoff": "2026-09-12",
+    "research_sources": 15,
+    "live_modes_observed": ["SCORE"],
+    "governance_loop": "NOT_COMPUTABLE: no governance-loop script exists in this repository; direct advisory spec edits requested by operator",
+    "notion_alignment": "NOT_COMPUTABLE: live Spec 010, Spec 009 and Sprint 001 contents not verified",
+    "loop_805_slice": "NOT_COMPUTABLE: no assigned slice supplied"
+  },
+  "TASK": "Complete the Brier module specification in place against repository conventions and current research.",
+  "OUTPUT EXPECTED": {
+    "behavioral_chain": "Journey -> Workflow -> State Transition -> Contract -> Acceptance Test -> Implementation Task",
+    "acceptance_cases": 24,
+    "implementation_tasks": 6,
+    "files": [
+      {"path": "specs/000-trutina-spine/spec.md", "sha256": "d83a4e00af7a45cb3554a49a3675a1eec1daa68ff6866f9f54e7140a9a7651c6"},
+      {"path": "specs/001-score/spec.md", "sha256": "771e57135fea487a183a73ff0cb9a64256330e668fc928bee92279e535f028f6"},
+      {"path": "specs/000-brier-spine/spec.md", "sha256": "87cb93fd261ebb0fd9f4e62f3d8632432e925151590b001b6c57042c4fce6197"}
+    ],
+    "hash_scope": "SHA-256 of raw UTF-8 file bytes with LF newlines; this receipt does not hash itself"
+  },
+  "VALIDATION": {
+    "git_diff_check": "PASS",
+    "relative_markdown_links": {"status": "PASS", "count": 5},
+    "fenced_blocks": "PASS: balanced",
+    "score_json_example": "PASS: parsed and checked against every keyword used by the present output schema; not a general JSON Schema engine",
+    "arithmetic_examples": {"status": "PASS", "count": 20},
+    "scope": "Three existing specification files plus this receipt; no runtime, schema, dependency or constitution change",
+    "runtime_acceptance": "NOT_RUN: specification-only revision; future acceptance cases are requirements, not current implementation passes"
+  },
+  "RESIDUAL RISKS": [
+    "NOT_COMPUTABLE: live Notion parity and slice assignment",
+    "NOT_COMPUTABLE: external receipt authenticity and adapter behavior",
+    "NOT_COMPUTABLE: corpus baseline, sampling/dependence design and empirical confidence coverage",
+    "OBSERVED: SCORE validation gaps remain for T01 implementation"
+  ],
+  "RECOMMENDED NEXT ADVISORY ACTION": "Review against live Spec 010, then implement T01 strict SCORE validation within the existing mode.",
+  "provenance_footer": "Provenance: Notion Sprint 001 Hub (live alignment NOT_COMPUTABLE) + Loop 805 Slice NOT_COMPUTABLE + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline)"
+}

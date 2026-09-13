@@ -1,5 +1,7 @@
 # Spec 000: Brier Spine
 
+Historical derivative precursor, preserved for provenance. The implementation-ready module specification is [the Trutina spine](../000-trutina-spine/spec.md), with atomic behavior in [Spec 001](../001-score/spec.md). The packet shapes, integration claims, file list and CLI examples below are historical proposals, not evidence of implemented interfaces. VOID is unscorable; binary range [0,1] is not the unscaled multiclass range. This does not govern or activate.
+
 **Owns**: Brier score computation (atomic, series, BSS, Murphy, Yates), performance ledger emission, skill evolution telemetry
 **Honesty**: OBSERVED / INFERRED / SPECULATIVE / NOT_COMPUTABLE
 **Shape**: T0 rules now. Encoder name-gated. Not a chatbot.
@@ -94,3 +96,5 @@ python -m brier compute 0.7 1 --settled-by human
 # Output: brier.packet.v0 with brier_score=0.09
 pytest -q
 ```
+
+Provenance: Notion Sprint 001 Hub (live alignment NOT_COMPUTABLE) + Loop 805 Slice NOT_COMPUTABLE + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline; historical body preserved).
