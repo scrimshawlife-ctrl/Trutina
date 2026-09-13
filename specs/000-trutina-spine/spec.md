@@ -71,7 +71,7 @@ Use finite binary64 arithmetic, validate before numeric conversion, and compare 
 |---|---|---|---|---|---|
 | Inspect a settled claim | Validate atom and receipt; compute loss | received → eligible → scored | SCORE, section 3 | A01–A05 | T01 |
 | Inspect an open or invalid claim | Validate lane/settlement; emit refusal | received → refused | Null score with failure | A06–A09 | T01 |
-| Review a cohort | Freeze membership; validate; aggregate | proposed cohort → validated → reported | BATCH proposal, section 4 | A10–A13 | T02 then T03 |
+| Review a cohort | Freeze membership and cutoff snapshot; validate; aggregate | proposed cohort → validated → reported | BATCH proposal, section 4 | A10–A13, A25–A28 | T02 then T03 |
 | Compare with a benchmark | Join identical cases; evaluate both | matched → compared or comparison unavailable | BSS and paired difference, section 5 | A14–A16 | T03 |
 | Diagnose forecast quality | Compute exact or binned components | scored cohort → diagnostic report | DECOMPOSE proposal, section 6 | A17–A20 | T02 then T04 |
 | Assess statistical evidence | Freeze estimand/resampling design; estimate interval | report → uncertainty estimated or NOT_COMPUTABLE | Section 7 | A21–A23 | T05 |
@@ -91,7 +91,23 @@ Receipt authenticity and forecast issue chronology are upstream responsibilities
 
 Current runtime: NOT_COMPUTABLE stub. The following is an INFERRED contract for a later cycle, not a newly registered packet schema. Do not add these fields to `brier.score.v0`.
 
-Freeze a cohort manifest before calculating any metric. Required manifest fields are `cohort_id`, `corpus_ref`, `manifest_hash`, `forecast_version`, `event_definition`, `positive_label`, `horizon`, `issued_window`, `settlement_cutoff`, `eligibility_policy`, `weight_policy`, `member_order` and `members`. IDs/references are nonempty strings, hashes are lowercase SHA-256 hex strings, times are offset-qualified ISO-8601, and windows are ordered start/end pairs. Unknown additional fields are refused by the future schema. Members are records with unique `case_id`, immutable `forecast_id` and `forecast_revision`, `event_id`, `issued_at`, optional `cluster_id`, a SCORE atom, and finite nonnegative `weight` (default 1). Hashing format must be explicitly versioned before implementation; the manifest hash cannot include itself.
+Freeze a cohort manifest before calculating any metric. Required manifest fields are `cohort_id`, `corpus_ref`, `manifest_hash`, `forecast_version`, `event_definition`, `positive_label`, `horizon`, `issued_window`, `settlement_cutoff`, `snapshot_ref`, `snapshot_as_of`, `eligibility_policy`, `weight_policy`, `member_order` and `members`. IDs/references are nonempty strings, hashes are lowercase SHA-256 hex strings, times are offset-qualified ISO-8601, and windows are ordered start/end pairs. Unknown additional fields are refused by the future schema. Each member has unique `case_id`, immutable `forecast_id` and `forecast_revision`, `event_id`, `issued_at`, optional `cluster_id`, finite nonnegative `weight` (default 1), and exactly one state-specific record below. Hashing format must be explicitly versioned before implementation; the manifest hash cannot include itself.
+
+#### Cutoff snapshot and member union
+
+INFERRED BATCH-only contract: `snapshot_ref` identifies immutable upstream evidence of the settlement state as of `snapshot_as_of`, which MUST equal `settlement_cutoff` as an instant. The input provider selects the revision effective at that cutoff, including any corrections already effective then. Later corrections must not rewrite historical snapshot inputs. A reference string establishes structural linkage only; authentication remains upstream and externally unverified evidence is reported as such.
+
+All members require a finite numeric `p` in [0,1], with the same strict numeric type rules as SCORE. `issued_at` must be inside the manifest's half-open issued window `[start,end)` and no later than the cutoff. Compare timestamps after normalization to UTC instants, never lexicographically. BATCH accepts these closed, discriminated member records; it does not require excluded members to be valid SCORE atoms:
+
+| `state` | Additional required fields | Forbidden fields | Cutoff behavior |
+|---|---|---|---|
+| `SETTLED` | `y` exactly 0 or 1; `settlement` TRUE/FALSE agreeing with y; nonblank `settled_by`; `settled_at`; nonblank `settlement_ref` | `void_reason` | Require `issued_at <= settled_at <= settlement_cutoff`; construct canonical SCORE atom and include in arithmetic |
+| `VOID` | `settlement` VOID; nonblank `settled_by`; `settled_at`; nonblank `settlement_ref`; nonblank `void_reason` | `y` | Require the same inclusive settlement-time bounds; count as void, never invoke SCORE |
+| `UNSETTLED` | No additional fields; snapshot evidence supplies the as-of state | `y`, `settlement`, `settled_by`, `settled_at`, `settlement_ref`, `void_reason` | Count as unsettled, never invoke SCORE |
+
+Forbidden fields MUST be absent, including when their value would be null. `state` is required and must be one of the three strings. A SETTLED member is mapped to SCORE using `payload_class=settled_forecast`, `mode=SCORE`, p/y, settlement fields and the manifest's corpus_ref. VOID and UNSETTLED are report-input states only; they do not expand SCORE acceptance. The existing atomic SCORE allowance for missing/null `settled_at` remains unchanged; BATCH imposes stronger temporal evidence requirements.
+
+A forecast settled or voided only after the cutoff is represented as UNSETTLED in this snapshot, with its later outcome and settlement fields absent. The provider must reconstruct that earlier state from upstream history; Trutina must not infer it from a current terminal record alone. A supplied SETTLED/VOID record dated after cutoff is refused with `SETTLEMENT_AFTER_CUTOFF`, rather than scored or silently rewritten. Missing terminal timing returns `SETTLEMENT_TIME_REQUIRED`; pre-issuance settlement returns `SETTLEMENT_BEFORE_ISSUE`; missing/mismatched snapshot linkage returns `CUTOFF_SNAPSHOT_REQUIRED`. These errors make the BATCH request NOT_COMPUTABLE. When historical evidence is unavailable, do not fabricate an UNSETTLED record to complete a report.
 
 Evaluation uses all validated TRUE/FALSE members eligible at the declared cutoff. VOID and genuinely unsettled cases are excluded and counted separately. Malformed records, contradictory settlements, duplicate case/revision IDs, mixed event definitions, mixed horizons or mixed score conventions fail the entire request; they are not silently dropped. For revisions or repeated forecasts of one event, select one revision by an outcome-independent manifest rule or retain them as correlated cases and disclose the estimand. Later settlement corrections create a superseding manifest; old reports are not overwritten.
 
@@ -103,13 +119,14 @@ Future report field contract:
 |---|---|
 | `status`, `honesty` | `COMPUTABLE`/`NOT_COMPUTABLE`; empirical arithmetic OBSERVED, inferential estimates INFERRED |
 | `formula`, `score_scale`, `manifest_hash`, `corpus_ref` | Binary formula, `binary_0_1`, immutable cohort linkage |
+| `snapshot_ref`, `snapshot_as_of`, `settlement_cutoff` | Copy the validated snapshot linkage and cutoff; excluded counts describe that instant, not present-day settlement status |
 | `n_total`, `n_scored`, `n_void`, `n_unsettled`, `n_zero_weight` | Nonnegative integers; total = scored + void + unsettled for a valid manifest; zero-weight is a subset of scored |
 | `weight_sum`, `sum_weighted_loss`, `brier` | Finite numeric sufficient statistics; brier null when no positive eligible mass |
 | `event_count`, `nonevent_count`, `prevalence` | Unweighted counts plus weighted event rate; event + nonevent = scored |
 | `weight_ess` | `W^2/sum(w_i^2)` when W>0; weight concentration diagnostic, not a serial-dependence correction |
 | `coverage` | scored / total or null for empty total; also expose refusal/exclusion counts |
 | `baseline`, `decomposition`, `interval` | Optional typed subrecords in sections 5–7; omitted when not requested, null with a reason when requested but unavailable |
-| `reasons` | Stable reason strings, including `EMPTY_COHORT`, `ZERO_WEIGHT`, `INVALID_MEMBER`, `DUPLICATE_CASE`, `MIXED_ESTIMAND` |
+| `reasons` | Stable reason strings, including `EMPTY_COHORT`, `ZERO_WEIGHT`, `INVALID_MEMBER`, `DUPLICATE_CASE`, `MIXED_ESTIMAND`, `SETTLEMENT_AFTER_CUTOFF`, `SETTLEMENT_TIME_REQUIRED`, `SETTLEMENT_BEFORE_ISSUE`, `CUTOFF_SNAPSHOT_REQUIRED` |
 | `forecast_eligible`, `can_promote`, `weight_mutation`, `phenomenal`, `ledger_id` | false, false, false, false, null |
 
 A later schema cycle must register/version this report shape and its member records before a mode-opening cycle (constitution X). API enum membership alone is not authorization to execute a mode.
@@ -232,6 +249,10 @@ Acceptance criteria below specify subsequent implementation tests. Completing th
 | A22 | Paired clustered/time series comparison | Preserve case pairs and resampling units; missing design returns unavailable interval |
 | A23 | Degenerate sample or zero-reference bootstrap replicate | Explicit unavailable interval; no dropped replicates or certainty claim |
 | A24 | Two-class p=[0.2,0.8], y=second class | Future full-vector score=0.08, half=0.04; current SCORE refuses vector |
+| A25 | SETTLED at cutoff `2026-09-12T12:00:00Z`, including equivalent `2026-09-12T05:00:00-07:00`; issued earlier inside window | Included; cutoff is inclusive and timezone normalization gives identical eligibility |
+| A26 | SETTLED/VOID missing or null settled_at, after cutoff, before issue; absent snapshot_ref or unequal snapshot_as_of | Whole batch NOT_COMPUTABLE with the corresponding temporal/snapshot reason; no partial aggregate |
+| A27 | Valid VOID and UNSETTLED records without y; unknown state; UNSETTLED with y=null; VOID with y=0 | Valid excluded records counted without SCORE calls; remaining variants invalidate the batch |
+| A28 | As-of snapshot: one SETTLED p=0.8,y=1, one VOID and one UNSETTLED whose outcome arrives next day, all weight=1 | n_total=3, n_scored=1, n_void=1, n_unsettled=1, coverage=1/3, weight_sum=1, brier=0.04; later result absent from snapshot and does not change report |
 
 T01: repair strict input validation and semantic schema tests in the existing SCORE surface; preserve numeric kernel, alias compatibility only where unambiguous, and frozen packet flags. T02: in a separate schema-only cycle, translate sections 4–7 into versioned closed report/input schemas, fixtures and deterministic receipt serialization. T03: later implement BATCH and benchmark arithmetic. T04: later implement exact/binned Murphy and moment identities; CORP/diagrams can be independently reviewed within DECOMPOSE. T05: implement the explicit resampling methods and assess coverage using synthetic IID, clustered, serial and rare-event designs. T06: review multiclass and other extensions without enabling them. Each task depends on the prior relevant contract and acceptance fixtures; no schema-change cycle simultaneously opens a new mode.
 

@@ -10,15 +10,16 @@
     "live_modes_observed": ["SCORE"],
     "workflow": "Trutina constitution, bind receipt and normal PR/review workflow",
     "notion_alignment": "NOT_COMPUTABLE: live designated Spec 010 and Spec 009 contents not verified",
-    "provenance_revision": "2026-09-13: repository-specific provenance corrected per operator scope clarification; original revision preserved in git history"
+    "provenance_revision": "2026-09-13: repository-specific provenance corrected per operator scope clarification; original revision preserved in git history",
+    "review_resolution": "2026-09-13: specified cutoff snapshot evidence, terminal timing requirements, late-settlement handling and the SETTLED/VOID/UNSETTLED member union; review baseline 8687910fc4956df665efa3c00d0ed2e618b7298c"
   },
   "TASK": "Complete the Brier module specification in place against repository conventions and current research.",
   "OUTPUT EXPECTED": {
     "behavioral_chain": "Journey -> Workflow -> State Transition -> Contract -> Acceptance Test -> Implementation Task",
-    "acceptance_cases": 24,
+    "acceptance_cases": 28,
     "implementation_tasks": 6,
     "files": [
-      {"path": "specs/000-trutina-spine/spec.md", "sha256": "6a9b1e727436132b0637a18d756f279b1122eba2a35e8fdef810f584ed498f3c"},
+      {"path": "specs/000-trutina-spine/spec.md", "sha256": "c75222953bd2e5aee49d97a2d2e24800cd596c6bf0b77418f27c55ad60a49616"},
       {"path": "specs/001-score/spec.md", "sha256": "417d6af5ea66cbf1f5a2166b965aa6c7cc5d52739235313a009841e1ad403bc9"},
       {"path": "specs/000-brier-spine/spec.md", "sha256": "3cc364b547281bf696942ce9c88e12c3b8f7e4128a684c414c40df8675ada9c1"}
     ],
