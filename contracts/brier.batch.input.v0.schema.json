@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abraxas.local/contracts/trutina/brier.batch.input.v0.schema.json",
+  "title": "brier.batch.input.v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "specialist",
+    "display",
+    "mode",
+    "cohort_id",
+    "corpus_ref",
+    "manifest_hash",
+    "forecast_version",
+    "event_definition",
+    "positive_label",
+    "horizon",
+    "issued_window",
+    "settlement_cutoff",
+    "snapshot_ref",
+    "snapshot_as_of",
+    "eligibility_policy",
+    "weight_policy",
+    "member_order",
+    "members"
+  ],
+  "properties": {
+    "schema": {"const": "brier.batch.input.v0"},
+    "specialist": {"const": "abx.brier"},
+    "display": {"const": "Trutina"},
+    "mode": {"const": "BATCH"},
+    "cohort_id": {"type": "string", "minLength": 1},
+    "corpus_ref": {"type": "string", "minLength": 1},
+    "manifest_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "forecast_version": {"type": "string", "minLength": 1},
+    "event_definition": {"type": "string", "minLength": 1},
+    "positive_label": {"const": 1},
+    "horizon": {"type": "string", "minLength": 1},
+    "issued_window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"}
+      }
+    },
+    "settlement_cutoff": {"type": "string", "format": "date-time"},
+    "snapshot_ref": {"type": "string", "minLength": 1},
+    "snapshot_as_of": {"type": "string", "format": "date-time"},
+    "eligibility_policy": {"type": "string", "minLength": 1},
+    "weight_policy": {"type": "string", "minLength": 1},
+    "member_order": {"type": "string", "minLength": 1},
+    "members": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/member"}
+    }
+  },
+  "$defs": {
+    "baseMember": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "forecast_id",
+        "forecast_revision",
+        "event_id",
+        "issued_at",
+        "p",
+        "weight",
+        "state"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "forecast_id": {"type": "string", "minLength": 1},
+        "forecast_revision": {"type": "string", "minLength": 1},
+        "event_id": {"type": "string", "minLength": 1},
+        "issued_at": {"type": "string", "format": "date-time"},
+        "p": {"type": "number", "minimum": 0, "maximum": 1},
+        "weight": {"type": "number", "minimum": 0},
+        "cluster_id": {"type": ["string", "null"]},
+        "state": {"enum": ["SETTLED", "VOID", "UNSETTLED"]}
+      }
+    },
+    "settledMember": {
+      "allOf": [
+        {"$ref": "#/$defs/baseMember"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "case_id",
+            "forecast_id",
+            "forecast_revision",
+            "event_id",
+            "issued_at",
+            "p",
+            "weight",
+            "state",
+            "y",
+            "settlement",
+            "settled_by",
+            "settled_at",
+            "settlement_ref"
+          ],
+          "properties": {
+            "case_id": {"type": "string", "minLength": 1},
+            "forecast_id": {"type": "string", "minLength": 1},
+            "forecast_revision": {"type": "string", "minLength": 1},
+            "event_id": {"type": "string", "minLength": 1},
+            "issued_at": {"type": "string", "format": "date-time"},
+            "p": {"type": "number", "minimum": 0, "maximum": 1},
+            "weight": {"type": "number", "minimum": 0},
+            "cluster_id": {"type": ["string", "null"]},
+            "state": {"const": "SETTLED"},
+            "y": {"enum": [0, 1]},
+            "settlement": {"enum": ["TRUE", "FALSE"]},
+            "settled_by": {"type": "string", "minLength": 1},
+            "settled_at": {"type": "string", "format": "date-time"},
+            "settlement_ref": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "voidMember": {
+      "allOf": [
+        {"$ref": "#/$defs/baseMember"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "case_id",
+            "forecast_id",
+            "forecast_revision",
+            "event_id",
+            "issued_at",
+            "p",
+            "weight",
+            "state",
+            "settlement",
+            "settled_by",
+            "settled_at",
+            "settlement_ref",
+            "void_reason"
+          ],
+          "properties": {
+            "case_id": {"type": "string", "minLength": 1},
+            "forecast_id": {"type": "string", "minLength": 1},
+            "forecast_revision": {"type": "string", "minLength": 1},
+            "event_id": {"type": "string", "minLength": 1},
+            "issued_at": {"type": "string", "format": "date-time"},
+            "p": {"type": "number", "minimum": 0, "maximum": 1},
+            "weight": {"type": "number", "minimum": 0},
+            "cluster_id": {"type": ["string", "null"]},
+            "state": {"const": "VOID"},
+            "settlement": {"const": "VOID"},
+            "settled_by": {"type": "string", "minLength": 1},
+            "settled_at": {"type": "string", "format": "date-time"},
+            "settlement_ref": {"type": "string", "minLength": 1},
+            "void_reason": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "unsettledMember": {
+      "allOf": [
+        {"$ref": "#/$defs/baseMember"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "case_id",
+            "forecast_id",
+            "forecast_revision",
+            "event_id",
+            "issued_at",
+            "p",
+            "weight",
+            "state"
+          ],
+          "properties": {
+            "case_id": {"type": "string", "minLength": 1},
+            "forecast_id": {"type": "string", "minLength": 1},
+            "forecast_revision": {"type": "string", "minLength": 1},
+            "event_id": {"type": "string", "minLength": 1},
+            "issued_at": {"type": "string", "format": "date-time"},
+            "p": {"type": "number", "minimum": 0, "maximum": 1},
+            "weight": {"type": "number", "minimum": 0},
+            "cluster_id": {"type": ["string", "null"]},
+            "state": {"const": "UNSETTLED"}
+          }
+        }
+      ]
+    },
+    "member": {
+      "oneOf": [
+        {"$ref": "#/$defs/settledMember"},
+        {"$ref": "#/$defs/voidMember"},
+        {"$ref": "#/$defs/unsettledMember"}
+      ]
+    }
+  }
+}
