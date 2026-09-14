@@ -81,7 +81,7 @@ def test_report_rejects_unregistered_methods():
         REPORT_VALIDATOR.validate(bad)
 
 
-def test_decompose_runtime_remains_closed_in_contract_cycle():
+def test_malformed_decompose_request_still_fails_closed_after_activation():
     packet = score({"mode": "DECOMPOSE"})
     assert packet["schema"] == "brier.score.v0"
     assert packet["mode"] == "DECOMPOSE"
