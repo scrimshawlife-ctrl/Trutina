@@ -21,6 +21,10 @@ DISPLAY = "Trutina"
 FORMULA = "BRIER_BINARY_V1"
 SCALE = "binary_0_1"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_REPORT_LINKAGE_KEYS = {
+    "manifest_hash", "corpus_ref", "snapshot_ref", "snapshot_as_of",
+    "settlement_cutoff", "members",
+}
 
 
 class BatchContractError(ValueError):
@@ -93,14 +97,24 @@ def _base_report(manifest: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _refuse(manifest: dict[str, Any], reason: str, *, counts: dict[str, int] | None = None) -> dict[str, Any]:
+def _refuse(manifest: dict[str, Any], reason: str) -> dict[str, Any]:
     report = _base_report(manifest)
     report["reasons"] = [reason]
-    if counts:
-        report.update(counts)
-        total = report["n_total"]
-        report["coverage"] = report["n_scored"] / total if total else None
     return report
+
+
+def _can_emit_registered_report(manifest: Any) -> bool:
+    return (
+        isinstance(manifest, dict)
+        and _REPORT_LINKAGE_KEYS.issubset(manifest)
+        and isinstance(manifest.get("members"), list)
+        and isinstance(manifest.get("manifest_hash"), str)
+        and _SHA256.fullmatch(manifest["manifest_hash"]) is not None
+        and _nonblank(manifest.get("corpus_ref"))
+        and _nonblank(manifest.get("snapshot_ref"))
+        and isinstance(manifest.get("snapshot_as_of"), str)
+        and isinstance(manifest.get("settlement_cutoff"), str)
+    )
 
 
 def _validate_manifest_header(manifest: Any) -> dict[str, Any]:
@@ -136,7 +150,13 @@ def _validate_manifest_header(manifest: Any) -> dict[str, Any]:
 
 def aggregate_batch(manifest: Any) -> dict[str, Any]:
     """Validate a T02 manifest and compute the T03 weighted Brier report."""
-    times = _validate_manifest_header(manifest)
+    try:
+        times = _validate_manifest_header(manifest)
+    except BatchContractError as exc:
+        if _can_emit_registered_report(manifest):
+            return _refuse(manifest, exc.reason)
+        raise
+
     report = _base_report(manifest)
     if not manifest["members"]:
         report["reasons"] = ["EMPTY_COHORT"]
