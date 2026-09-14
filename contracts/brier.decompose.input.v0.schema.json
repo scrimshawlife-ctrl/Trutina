@@ -10,7 +10,14 @@
     "specialist": {"const": "abx.brier"},
     "display": {"const": "Trutina"},
     "mode": {"const": "DECOMPOSE"},
-    "manifest": {"type": "object"},
+    "manifest": {
+      "type": "object",
+      "required": ["schema", "manifest_hash"],
+      "properties": {
+        "schema": {"const": "brier.batch.input.v0"},
+        "manifest_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
     "method": {"enum": ["MURPHY_EXACT_V1", "MURPHY_BINNED_V1"]},
     "bin_edges": {
       "type": ["array", "null"],
