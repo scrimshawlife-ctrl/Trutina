@@ -179,8 +179,7 @@ def test_a26_temporal_and_snapshot_failures():
     assert before["reasons"] == ["SETTLEMENT_BEFORE_ISSUE"]
     snap = manifest([settled("a", 0.8, 1)])
     snap["snapshot_as_of"] = "2026-09-12T11:59:59Z"
-    with pytest.raises(Exception):
-        aggregate_batch(snap)
+    assert checked(snap)["reasons"] == ["CUTOFF_SNAPSHOT_REQUIRED"]
 
 
 def test_a27_void_and_unsettled_are_excluded_but_invalid_variant_refused():
