@@ -15,7 +15,9 @@ Candidate future score:
 Disposition: **DEFERRED / SEPARATE CONTRACT REQUIRED**.
 
 Requirements before any future activation:
-- K >= 2 fixed class labels with explicit canonical order;
+- K >= 2 **unique, mutually exclusive, exhaustive** class labels with explicit canonical order;
+- the observed class label must belong to the declared class-label set and map to exactly one vector component;
+- duplicate labels, omitted possible outcomes, or ambiguous/out-of-set observed labels are invalid and must fail closed;
 - finite nonnegative probabilities with simplex sum within declared tolerance;
 - separate formula identifier, e.g. `BRIER_MULTICLASS_UNSCALED_V1`;
 - explicit score range `[0,2]` for the unscaled convention;
@@ -85,4 +87,4 @@ PRODUCTION_ACTIVATION=false
 
 Any future extension must begin with a new contract/spec cycle and must not reuse `brier.score.v0` merely because the underlying mathematics is related.
 
-Provenance: Trutina Spec 000 section 8 / T06; current runtime baseline includes bounded SCORE, BATCH, DECOMPOSE and separately gated T05 uncertainty surfaces.
+Provenance: Trutina Spec 000 section 8 / T06; current runtime baseline includes bounded SCORE, BATCH, DECOMPOSE and separately gated T05 uncertainty surfaces. Follow-up boundary clarification incorporates Codex review finding from PR #14 concerning exhaustive/unique multiclass labels.
