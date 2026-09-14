@@ -197,3 +197,8 @@ def test_t05_and_other_diagnostics_remain_closed():
     interval_mode = score({"mode": "PROJECT"})
     assert interval_mode["honesty"] == "NOT_COMPUTABLE"
     assert interval_mode["can_promote"] is False
+
+
+def test_decompose_report_has_no_interval_surface_before_t05():
+    report = checked(exact_murphy(manifest([settled("a", 0.8, 1)])))
+    assert "interval" not in report
