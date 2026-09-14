@@ -1,4 +1,4 @@
-"""SCORE mode. Spec 001. Packet brier.score.v0."""
+"""SCORE and bounded BATCH dispatch. Specs 001 and 000/T03."""
 
 from __future__ import annotations
 
@@ -13,8 +13,8 @@ SPECIALIST = "abx.brier"
 DISPLAY = "Trutina"
 FORMULA = "BRIER_BINARY_V1"
 OTHER_ATOMS = {"slang_atom", "tradition_atom", "sign_atom", "route_atom"}
-LIVE_MODES = {"SCORE"}
-STUB_MODES = {"BATCH", "DECOMPOSE", "FUSION_ADVISORY", "ROUTER_MICRO", "GATE_ADVISORY", "PROJECT"}
+LIVE_MODES = {"SCORE", "BATCH"}
+STUB_MODES = {"DECOMPOSE", "FUSION_ADVISORY", "ROUTER_MICRO", "GATE_ADVISORY", "PROJECT"}
 
 
 def _base(*, mode: str, brier: float | None, honesty: str, failure: str | None, corpus_ref: str | None) -> dict[str, Any]:
@@ -63,8 +63,6 @@ def _number(atom: dict[str, Any], canonical: str, alias: str, *, binary: bool = 
     if not values:
         raise ValueError("missing number")
     for value in values:
-        # Check native JSON numbers and their bounds before conversion. This also
-        # excludes booleans, NaN/infinity and oversized integers without overflow.
         if type(value) not in (int, float) or not 0 <= value <= 1:
             raise ValueError("invalid number")
         if binary and value not in (0, 1):
@@ -83,7 +81,7 @@ def _refuse(ref: str | None = None, *, mode: str = "SCORE", lane: bool = False) 
 
 
 def score(atom: Any) -> dict[str, Any]:
-    """Validate a settled JSON atom and emit a score or schema-valid refusal."""
+    """Validate a SCORE atom or dispatch a registered BATCH manifest."""
     if not isinstance(atom, dict):
         return _refuse()
     raw_ref = atom.get("corpus_ref")
@@ -95,6 +93,14 @@ def score(atom: Any) -> dict[str, Any]:
         return _refuse(ref, mode=mode)
     if mode not in LIVE_MODES:
         return _refuse(ref)
+
+    if mode == "BATCH":
+        from .batch import BatchContractError, aggregate_batch
+
+        try:
+            return aggregate_batch(atom)
+        except BatchContractError:
+            return _refuse(ref, mode="BATCH")
 
     payload = atom.get("payload_class")
     if not isinstance(payload, str) or payload == "forecast_request":
@@ -123,4 +129,4 @@ def score(atom: Any) -> dict[str, Any]:
     return _base(mode="SCORE", brier=value, honesty="OBSERVED", failure=None, corpus_ref=ref)
 
 
-# Provenance: Trutina Spec 001 / T01; specification baseline ecbf403.
+# Provenance: Trutina Spec 001 / T01 + Spec 000 / T03.
