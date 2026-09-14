@@ -18,6 +18,13 @@ DISPLAY = "Trutina"
 RNG_VERSION = "TRUTINA_LCG32_V1"
 MAX_CASE_DRAWS = 20_000_000
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_ESTIMANDS = {"BRIER_MEAN", "PAIRED_DELTA", "BSS"}
+_METHODS = {
+    "IID_PERCENTILE_BOOTSTRAP_V1",
+    "CLUSTER_PERCENTILE_BOOTSTRAP_V1",
+    "MOVING_BLOCK_PERCENTILE_BOOTSTRAP_V1",
+}
+_UNITS = {"CASE", "CLUSTER", "MOVING_BLOCK"}
 
 
 class _LCG32:
@@ -37,19 +44,43 @@ class _LCG32:
 
 
 def _base(request: dict[str, Any]) -> dict[str, Any]:
+    estimand = request.get("estimand")
+    if estimand not in _ESTIMANDS:
+        estimand = "BRIER_MEAN"
+    method = request.get("method")
+    if method not in _METHODS:
+        method = "IID_PERCENTILE_BOOTSTRAP_V1"
+    confidence = request.get("confidence_level")
+    if type(confidence) not in (int, float) or not 0 < float(confidence) < 1:
+        confidence = 0.95
+    seed = request.get("seed")
+    if type(seed) is not int or seed < 0:
+        seed = 0
+    rng_version = request.get("rng_version")
+    if not isinstance(rng_version, str) or not rng_version:
+        rng_version = RNG_VERSION
+    replicates = request.get("replicates")
+    if type(replicates) is not int or replicates < 1:
+        replicates = 1
+    unit = request.get("resampling_unit")
+    if unit not in _UNITS:
+        unit = "CASE"
+    block_length = request.get("block_length")
+    if type(block_length) is not int or block_length < 1:
+        block_length = None
     return {
         "schema": SCHEMA,
         "specialist": SPECIALIST,
         "display": DISPLAY,
-        "estimand": request.get("estimand", "BRIER_MEAN"),
-        "method": request.get("method", "IID_PERCENTILE_BOOTSTRAP_V1"),
-        "confidence_level": request.get("confidence_level", 0.95),
-        "seed": request.get("seed", 0),
-        "rng_version": request.get("rng_version", RNG_VERSION),
-        "replicates_requested": request.get("replicates", 0),
+        "estimand": estimand,
+        "method": method,
+        "confidence_level": float(confidence),
+        "seed": seed,
+        "rng_version": rng_version,
+        "replicates_requested": replicates,
         "replicates_valid": 0,
-        "resampling_unit": request.get("resampling_unit", "CASE"),
-        "block_length": request.get("block_length"),
+        "resampling_unit": unit,
+        "block_length": block_length,
         "lower": None,
         "upper": None,
         "status": "NOT_COMPUTABLE",
@@ -237,7 +268,7 @@ def estimate_interval(request: Any, records: Any) -> dict[str, Any]:
         return _unavailable(request, "INVALID_DESIGN")
 
     estimand = request.get("estimand")
-    if estimand not in {"BRIER_MEAN", "PAIRED_DELTA", "BSS"}:
+    if estimand not in _ESTIMANDS:
         return _unavailable(request, "INVALID_DESIGN")
     if estimand in {"PAIRED_DELTA", "BSS"}:
         reference_id = request.get("reference_id")
