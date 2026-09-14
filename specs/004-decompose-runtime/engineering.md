@@ -23,6 +23,8 @@ Status: SHADOW bounded implementation. DECOMPOSE opens only for registered exact
 
 Only a registered `brier.decompose.input.v0` request with a linked `brier.batch.input.v0` manifest and a registered method enters DECOMPOSE. Malformed or unregistered requests retain the legacy `brier.score.v0` NOT_COMPUTABLE refusal behavior.
 
+The DECOMPOSE report intentionally contains no interval surface before T05.
+
 ```text
 DECOMPOSE_RUNTIME_ENABLED=true
 INTERVAL_RUNTIME_ENABLED=false
