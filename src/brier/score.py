@@ -75,7 +75,9 @@ def _number(atom: dict[str, Any], canonical: str, alias: str, *, binary: bool = 
 
 def _refuse(ref: str | None = None, *, mode: str = "SCORE", lane: bool = False) -> dict[str, Any]:
     return _base(
-        mode=mode, brier=None, honesty="NOT_COMPUTABLE",
+        mode=mode,
+        brier=None,
+        honesty="NOT_COMPUTABLE",
         failure="SPECIALIST_LANE_VIOLATION" if lane else "NOT_COMPUTABLE",
         corpus_ref=ref,
     )
@@ -92,7 +94,12 @@ def _registered_decompose_request(atom: dict[str, Any]) -> bool:
     manifest_hash = manifest.get("manifest_hash")
     if not isinstance(manifest_hash, str) or _SHA256.fullmatch(manifest_hash) is None:
         return False
-    return atom.get("method") in {"MURPHY_EXACT_V1", "MURPHY_BINNED_V1"}
+    method = atom.get("method")
+    if method == "MURPHY_EXACT_V1":
+        return atom.get("bin_edges") is None
+    if method == "MURPHY_BINNED_V1":
+        return isinstance(atom.get("bin_edges"), list)
+    return False
 
 
 def score(atom: Any) -> dict[str, Any]:
@@ -111,7 +118,6 @@ def score(atom: Any) -> dict[str, Any]:
 
     if mode == "BATCH":
         from .batch import BatchContractError, aggregate_batch
-
         try:
             return aggregate_batch(atom)
         except BatchContractError:
