@@ -155,6 +155,39 @@ def test_public_dispatch_exact_and_binned_reports():
     assert binned["status"] == "COMPUTABLE"
 
 
+def test_registered_partial_manifest_fails_closed_as_decompose_report():
+    request = {
+        "schema": "brier.decompose.input.v0",
+        "specialist": "abx.brier",
+        "display": "Trutina",
+        "mode": "DECOMPOSE",
+        "manifest": {"schema": "brier.batch.input.v0", "manifest_hash": HASH},
+        "method": EXACT,
+        "bin_edges": None,
+    }
+    report = checked(score(request))
+    assert report["status"] == "NOT_COMPUTABLE"
+    assert report["reasons"] == ["INVALID_MEMBER"]
+
+
+def test_unregistered_extra_top_level_field_uses_legacy_refusal_packet():
+    request = {
+        "schema": "brier.decompose.input.v0",
+        "specialist": "abx.brier",
+        "display": "Trutina",
+        "mode": "DECOMPOSE",
+        "manifest": manifest([settled("a", 0.8, 1)]),
+        "method": EXACT,
+        "bin_edges": None,
+        "runtime_enabled": True,
+    }
+    packet = score(request)
+    assert packet["schema"] == "brier.score.v0"
+    assert packet["mode"] == "DECOMPOSE"
+    assert packet["honesty"] == "NOT_COMPUTABLE"
+    assert packet["failure"] == "NOT_COMPUTABLE"
+
+
 def test_t05_and_other_diagnostics_remain_closed():
     malformed = score({"mode": "DECOMPOSE", "method": "CORP_PAV_V1"})
     assert malformed["schema"] == "brier.score.v0"
