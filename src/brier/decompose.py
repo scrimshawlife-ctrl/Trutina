@@ -11,7 +11,7 @@ from collections import defaultdict
 from math import fsum, isfinite
 from typing import Any
 
-from .batch import aggregate_batch
+from .batch import BatchContractError, aggregate_batch
 
 SCHEMA = "brier.decompose.report.v0"
 SPECIALIST = "abx.brier"
@@ -229,11 +229,15 @@ def decompose(request: Any) -> dict[str, Any]:
     method = request.get("method")
     if not isinstance(manifest, dict):
         return _refuse(method if method in {EXACT, BINNED} else EXACT, "", "INVALID_MEMBER")
-    if method == EXACT:
-        return exact_murphy(manifest)
-    if method == BINNED:
-        return binned_murphy(manifest, request.get("bin_edges"))
-    return _refuse(EXACT, manifest.get("manifest_hash", ""), "INVALID_MEMBER")
+    manifest_hash = manifest.get("manifest_hash", "")
+    try:
+        if method == EXACT:
+            return exact_murphy(manifest)
+        if method == BINNED:
+            return binned_murphy(manifest, request.get("bin_edges"))
+    except BatchContractError as exc:
+        return _refuse(method if method in {EXACT, BINNED} else EXACT, manifest_hash, exc.reason)
+    return _refuse(EXACT, manifest_hash, "INVALID_MEMBER")
 
 
 def murphy_elementary_integral(p: float, y: int) -> float:

@@ -16,6 +16,7 @@ OTHER_ATOMS = {"slang_atom", "tradition_atom", "sign_atom", "route_atom"}
 LIVE_MODES = {"SCORE", "BATCH", "DECOMPOSE"}
 STUB_MODES = {"FUSION_ADVISORY", "ROUTER_MICRO", "GATE_ADVISORY", "PROJECT"}
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_DECOMPOSE_FIELDS = {"schema", "specialist", "display", "mode", "manifest", "method", "bin_edges"}
 
 
 def _base(*, mode: str, brier: float | None, honesty: str, failure: str | None, corpus_ref: str | None) -> dict[str, Any]:
@@ -84,6 +85,11 @@ def _refuse(ref: str | None = None, *, mode: str = "SCORE", lane: bool = False) 
 
 
 def _registered_decompose_request(atom: dict[str, Any]) -> bool:
+    if not set(atom).issubset(_DECOMPOSE_FIELDS):
+        return False
+    required = {"schema", "specialist", "display", "mode", "manifest", "method"}
+    if not required.issubset(atom):
+        return False
     if atom.get("schema") != "brier.decompose.input.v0":
         return False
     if atom.get("specialist") != SPECIALIST or atom.get("display") != DISPLAY:
