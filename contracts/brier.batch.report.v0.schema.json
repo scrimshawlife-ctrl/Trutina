@@ -65,9 +65,9 @@
     "prevalence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
     "weight_ess": {"type": ["number", "null"], "minimum": 0},
     "coverage": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
-    "baseline": {"type": ["object", "null"]},
-    "decomposition": {"type": ["object", "null"]},
-    "interval": {"type": ["object", "null"]},
+    "baseline": {"type": "null"},
+    "decomposition": {"type": "null"},
+    "interval": {"type": "null"},
     "reasons": {
       "type": "array",
       "items": {
