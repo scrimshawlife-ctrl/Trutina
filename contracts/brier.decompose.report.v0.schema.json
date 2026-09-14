@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abraxas.local/contracts/trutina/brier.decompose.report.v0.schema.json",
+  "title": "brier.decompose.report.v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "specialist", "display", "mode", "status", "honesty",
+    "method", "manifest_hash", "raw_brier", "reliability", "resolution",
+    "uncertainty", "reconstruction_residual", "groups", "reasons",
+    "forecast_eligible", "can_promote", "weight_mutation", "phenomenal", "ledger_id"
+  ],
+  "properties": {
+    "schema": {"const": "brier.decompose.report.v0"},
+    "specialist": {"const": "abx.brier"},
+    "display": {"const": "Trutina"},
+    "mode": {"const": "DECOMPOSE"},
+    "status": {"enum": ["COMPUTABLE", "NOT_COMPUTABLE"]},
+    "honesty": {"enum": ["OBSERVED", "NOT_COMPUTABLE"]},
+    "method": {"enum": ["MURPHY_EXACT_V1", "MURPHY_BINNED_V1"]},
+    "manifest_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "raw_brier": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "binned_brier": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "reliability": {"type": ["number", "null"]},
+    "resolution": {"type": ["number", "null"]},
+    "uncertainty": {"type": ["number", "null"]},
+    "within_correction": {"type": ["number", "null"]},
+    "reconstruction_residual": {"type": ["number", "null"]},
+    "singleton_fraction": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "bin_edges": {
+      "type": ["array", "null"],
+      "items": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["count", "mass", "mean_forecast", "event_rate"],
+        "properties": {
+          "count": {"type": "integer", "minimum": 0},
+          "mass": {"type": "number", "minimum": 0, "maximum": 1},
+          "mean_forecast": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "event_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "left": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "right": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "within_variance": {"type": ["number", "null"], "minimum": 0},
+          "within_covariance": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "reasons": {
+      "type": "array",
+      "items": {"enum": ["EMPTY_COHORT", "ZERO_WEIGHT", "INVALID_MEMBER", "INVALID_BIN_EDGES", "NUMERICAL_IDENTITY_FAILURE"]},
+      "uniqueItems": true
+    },
+    "forecast_eligible": {"const": false},
+    "can_promote": {"const": false},
+    "weight_mutation": {"const": false},
+    "phenomenal": {"const": false},
+    "ledger_id": {"type": "null"}
+  }
+}
