@@ -1,9 +1,8 @@
 """DECOMPOSE mode. Spec 000 / T04B.
 
 Exact Murphy decomposition, corrected binned decomposition, and the elementary
-Murphy-loss integral. Uses the same settled cohort contract as BATCH. This module
-is diagnostic only: no promotion, forecast, ledger, interval, or weight-mutation
-authority.
+Murphy-loss integral. Uses the same settled cohort contract as BATCH. Diagnostic
+only: no promotion, forecast, ledger, interval, or weight-mutation authority.
 """
 
 from __future__ import annotations
@@ -20,6 +19,13 @@ DISPLAY = "Trutina"
 EXACT = "MURPHY_EXACT_V1"
 BINNED = "MURPHY_BINNED_V1"
 TOLERANCE = 1e-12
+_REGISTERED_REASONS = {
+    "EMPTY_COHORT",
+    "ZERO_WEIGHT",
+    "INVALID_MEMBER",
+    "INVALID_BIN_EDGES",
+    "NUMERICAL_IDENTITY_FAILURE",
+}
 
 
 def _base(method: str, manifest_hash: str) -> dict[str, Any]:
@@ -51,9 +57,13 @@ def _base(method: str, manifest_hash: str) -> dict[str, Any]:
     }
 
 
+def _reason(value: str) -> str:
+    return value if value in _REGISTERED_REASONS else "INVALID_MEMBER"
+
+
 def _refuse(method: str, manifest_hash: str, reason: str) -> dict[str, Any]:
     report = _base(method, manifest_hash)
-    report["reasons"] = [reason]
+    report["reasons"] = [_reason(reason)]
     return report
 
 
@@ -66,25 +76,22 @@ def _positive_scored_rows(manifest: dict[str, Any]) -> tuple[dict[str, Any], lis
         if row.get("state") != "SETTLED":
             continue
         weight = float(row["weight"])
-        if weight <= 0:
-            continue
-        rows.append((float(row["p"]), int(row["y"]), weight))
+        if weight > 0:
+            rows.append((float(row["p"]), int(row["y"]), weight))
     return batch, rows
 
 
 def _common(rows: list[tuple[float, int, float]]) -> tuple[float, float, float]:
     weight_sum = fsum(weight for _, _, weight in rows)
     q = fsum(weight * y for _, y, weight in rows) / weight_sum
-    unc = q * (1.0 - q)
-    return weight_sum, q, unc
+    return weight_sum, q, q * (1.0 - q)
 
 
 def exact_murphy(manifest: dict[str, Any]) -> dict[str, Any]:
     manifest_hash = manifest.get("manifest_hash", "") if isinstance(manifest, dict) else ""
     batch, rows = _positive_scored_rows(manifest)
     if not rows:
-        reason = (batch.get("reasons") or ["EMPTY_COHORT"])[0]
-        return _refuse(EXACT, manifest_hash, reason)
+        return _refuse(EXACT, manifest_hash, (batch.get("reasons") or ["EMPTY_COHORT"])[0])
 
     weight_sum, q, unc = _common(rows)
     grouped: dict[float, list[tuple[int, float]]] = defaultdict(list)
@@ -102,35 +109,23 @@ def exact_murphy(manifest: dict[str, Any]) -> dict[str, Any]:
         q_g = fsum(weight * y for y, weight in members) / group_weight
         rel_terms.append(mass * (p - q_g) ** 2)
         res_terms.append(mass * (q_g - q) ** 2)
-        if len(members) == 1:
-            singleton_count += 1
+        singleton_count += int(len(members) == 1)
         groups.append({
-            "count": len(members),
-            "mass": mass,
-            "mean_forecast": p,
-            "event_rate": q_g,
-            "left": None,
-            "right": None,
-            "within_variance": None,
-            "within_covariance": None,
+            "count": len(members), "mass": mass, "mean_forecast": p,
+            "event_rate": q_g, "left": None, "right": None,
+            "within_variance": None, "within_covariance": None,
         })
 
     rel = fsum(rel_terms)
     res = fsum(res_terms)
     raw = float(batch["brier"])
-    reconstructed = rel - res + unc
-    residual = raw - reconstructed
+    residual = raw - (rel - res + unc)
     report = _base(EXACT, manifest_hash)
     report.update(
-        status="COMPUTABLE",
-        honesty="OBSERVED",
-        raw_brier=raw,
-        reliability=rel,
-        resolution=res,
-        uncertainty=unc,
+        status="COMPUTABLE", honesty="OBSERVED", raw_brier=raw,
+        reliability=rel, resolution=res, uncertainty=unc,
         reconstruction_residual=residual,
-        singleton_fraction=singleton_count / len(groups),
-        groups=groups,
+        singleton_fraction=singleton_count / len(groups), groups=groups,
     )
     if abs(residual) > TOLERANCE:
         report.update(status="NOT_COMPUTABLE", honesty="NOT_COMPUTABLE", reasons=["NUMERICAL_IDENTITY_FAILURE"])
@@ -140,14 +135,14 @@ def exact_murphy(manifest: dict[str, Any]) -> dict[str, Any]:
 def _validate_edges(edges: Any) -> list[float] | None:
     if not isinstance(edges, list) or len(edges) < 2:
         return None
-    if any(type(value) not in (int, float) or not isfinite(float(value)) for value in edges):
+    if any(type(v) not in (int, float) or not isfinite(float(v)) for v in edges):
         return None
-    values = [float(value) for value in edges]
+    values = [float(v) for v in edges]
     if values[0] != 0.0 or values[-1] != 1.0:
         return None
-    if any(not 0.0 <= value <= 1.0 for value in values):
+    if any(not 0.0 <= v <= 1.0 for v in values):
         return None
-    if any(left >= right for left, right in zip(values, values[1:])):
+    if any(a >= b for a, b in zip(values, values[1:])):
         return None
     return values
 
@@ -169,8 +164,7 @@ def binned_murphy(manifest: dict[str, Any], edges: Any) -> dict[str, Any]:
 
     batch, rows = _positive_scored_rows(manifest)
     if not rows:
-        reason = (batch.get("reasons") or ["EMPTY_COHORT"])[0]
-        return _refuse(BINNED, manifest_hash, reason)
+        return _refuse(BINNED, manifest_hash, (batch.get("reasons") or ["EMPTY_COHORT"])[0])
 
     weight_sum, q, unc = _common(rows)
     bins: list[list[tuple[float, int, float]]] = [[] for _ in range(len(valid_edges) - 1)]
@@ -187,14 +181,9 @@ def binned_murphy(manifest: dict[str, Any], edges: Any) -> dict[str, Any]:
         left, right = valid_edges[index], valid_edges[index + 1]
         if not members:
             groups.append({
-                "count": 0,
-                "mass": 0.0,
-                "mean_forecast": None,
-                "event_rate": None,
-                "left": left,
-                "right": right,
-                "within_variance": None,
-                "within_covariance": None,
+                "count": 0, "mass": 0.0, "mean_forecast": None,
+                "event_rate": None, "left": left, "right": right,
+                "within_variance": None, "within_covariance": None,
             })
             continue
 
@@ -207,18 +196,11 @@ def binned_murphy(manifest: dict[str, Any], edges: Any) -> dict[str, Any]:
         rel_terms.append(mass * (p_bar - q_g) ** 2)
         res_terms.append(mass * (q_g - q) ** 2)
         within_terms.append(mass * (variance - 2.0 * covariance))
-        binned_loss_terms.append(
-            fsum(weight * (p_bar - y) ** 2 for _, y, weight in members) / weight_sum
-        )
+        binned_loss_terms.append(fsum(weight * (p_bar - y) ** 2 for _, y, weight in members) / weight_sum)
         groups.append({
-            "count": len(members),
-            "mass": mass,
-            "mean_forecast": p_bar,
-            "event_rate": q_g,
-            "left": left,
-            "right": right,
-            "within_variance": variance,
-            "within_covariance": covariance,
+            "count": len(members), "mass": mass, "mean_forecast": p_bar,
+            "event_rate": q_g, "left": left, "right": right,
+            "within_variance": variance, "within_covariance": covariance,
         })
 
     rel = fsum(rel_terms)
@@ -226,23 +208,14 @@ def binned_murphy(manifest: dict[str, Any], edges: Any) -> dict[str, Any]:
     within = fsum(within_terms)
     binned = fsum(binned_loss_terms)
     raw = float(batch["brier"])
-    reconstructed = rel - res + unc + within
-    residual = raw - reconstructed
-
+    residual = raw - (rel - res + unc + within)
     report = _base(BINNED, manifest_hash)
     report.update(
-        status="COMPUTABLE",
-        honesty="OBSERVED",
-        raw_brier=raw,
-        binned_brier=binned,
-        reliability=rel,
-        resolution=res,
-        uncertainty=unc,
-        within_correction=within,
-        reconstruction_residual=residual,
-        singleton_fraction=None,
-        bin_edges=valid_edges,
-        groups=groups,
+        status="COMPUTABLE", honesty="OBSERVED", raw_brier=raw,
+        binned_brier=binned, reliability=rel, resolution=res,
+        uncertainty=unc, within_correction=within,
+        reconstruction_residual=residual, singleton_fraction=None,
+        bin_edges=valid_edges, groups=groups,
     )
     if abs(residual) > TOLERANCE:
         report.update(status="NOT_COMPUTABLE", honesty="NOT_COMPUTABLE", reasons=["NUMERICAL_IDENTITY_FAILURE"])
@@ -250,7 +223,6 @@ def binned_murphy(manifest: dict[str, Any], edges: Any) -> dict[str, Any]:
 
 
 def decompose(request: Any) -> dict[str, Any]:
-    """Dispatch a registered DECOMPOSE request."""
     if not isinstance(request, dict):
         return _refuse(EXACT, "", "INVALID_MEMBER")
     manifest = request.get("manifest")
