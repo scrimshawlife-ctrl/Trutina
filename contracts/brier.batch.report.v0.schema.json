@@ -67,7 +67,40 @@
     "coverage": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
     "baseline": {"type": "null"},
     "decomposition": {"type": "null"},
-    "interval": {"type": "null"},
+    "interval": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema", "specialist", "display", "estimand", "method", "confidence_level",
+            "seed", "rng_version", "replicates_requested", "replicates_valid",
+            "resampling_unit", "block_length", "lower", "upper", "status", "reason",
+            "zero_reference_replicates"
+          ],
+          "properties": {
+            "schema": {"const": "brier.interval.report.v0"},
+            "specialist": {"const": "abx.brier"},
+            "display": {"const": "Trutina"},
+            "estimand": {"enum": ["BRIER_MEAN", "PAIRED_DELTA", "BSS"]},
+            "method": {"enum": ["IID_PERCENTILE_BOOTSTRAP_V1", "CLUSTER_PERCENTILE_BOOTSTRAP_V1", "MOVING_BLOCK_PERCENTILE_BOOTSTRAP_V1"]},
+            "confidence_level": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+            "seed": {"type": "integer", "minimum": 0},
+            "rng_version": {"type": "string", "minLength": 1},
+            "replicates_requested": {"type": "integer", "minimum": 1},
+            "replicates_valid": {"type": "integer", "minimum": 0},
+            "resampling_unit": {"enum": ["CASE", "CLUSTER", "MOVING_BLOCK"]},
+            "block_length": {"type": ["integer", "null"], "minimum": 1},
+            "lower": {"type": ["number", "null"]},
+            "upper": {"type": ["number", "null"]},
+            "status": {"enum": ["COMPUTABLE", "NOT_COMPUTABLE"]},
+            "reason": {"enum": [null, "SAMPLING_DESIGN_UNKNOWN", "DEGENERATE_SAMPLE", "ZERO_REFERENCE_REPLICATE", "INVALID_DESIGN", "RESOURCE_LIMIT", "NONFINITE_RESULT"]},
+            "zero_reference_replicates": {"type": "integer", "minimum": 0}
+          }
+        }
+      ]
+    },
     "reasons": {
       "type": "array",
       "items": {

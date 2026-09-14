@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abraxas.local/contracts/trutina/brier.interval.request.v0.schema.json",
+  "title": "brier.interval.request.v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "specialist", "display", "estimand", "method", "manifest_hash",
+    "confidence_level", "seed", "rng_version", "replicates", "resampling_unit",
+    "sampling_assumption", "weight_design"
+  ],
+  "properties": {
+    "schema": {"const": "brier.interval.request.v0"},
+    "specialist": {"const": "abx.brier"},
+    "display": {"const": "Trutina"},
+    "estimand": {"enum": ["BRIER_MEAN", "PAIRED_DELTA", "BSS"]},
+    "method": {"enum": ["IID_PERCENTILE_BOOTSTRAP_V1", "CLUSTER_PERCENTILE_BOOTSTRAP_V1", "MOVING_BLOCK_PERCENTILE_BOOTSTRAP_V1"]},
+    "manifest_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "confidence_level": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "rng_version": {"type": "string", "minLength": 1},
+    "replicates": {"type": "integer", "minimum": 1, "maximum": 100000},
+    "resampling_unit": {"enum": ["CASE", "CLUSTER", "MOVING_BLOCK"]},
+    "sampling_assumption": {"enum": ["IID", "INDEPENDENT_CLUSTERS", "APPROX_STATIONARY_SERIAL"]},
+    "weight_design": {"enum": ["EQUAL_FIXED", "OUTCOME_INDEPENDENT_FIXED"]},
+    "cluster_field": {"type": ["string", "null"], "minLength": 1},
+    "block_length": {"type": ["integer", "null"], "minimum": 1},
+    "reference_id": {"type": ["string", "null"], "minLength": 1},
+    "matched_reference_hash": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"method": {"const": "IID_PERCENTILE_BOOTSTRAP_V1"}}},
+      "then": {
+        "properties": {
+          "resampling_unit": {"const": "CASE"},
+          "sampling_assumption": {"const": "IID"},
+          "cluster_field": {"type": "null"},
+          "block_length": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"method": {"const": "CLUSTER_PERCENTILE_BOOTSTRAP_V1"}}},
+      "then": {
+        "required": ["cluster_field"],
+        "properties": {
+          "resampling_unit": {"const": "CLUSTER"},
+          "sampling_assumption": {"const": "INDEPENDENT_CLUSTERS"},
+          "cluster_field": {"type": "string", "minLength": 1},
+          "block_length": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"method": {"const": "MOVING_BLOCK_PERCENTILE_BOOTSTRAP_V1"}}},
+      "then": {
+        "required": ["block_length"],
+        "properties": {
+          "resampling_unit": {"const": "MOVING_BLOCK"},
+          "sampling_assumption": {"const": "APPROX_STATIONARY_SERIAL"},
+          "cluster_field": {"type": "null"},
+          "block_length": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"estimand": {"enum": ["PAIRED_DELTA", "BSS"]}}},
+      "then": {"required": ["reference_id", "matched_reference_hash"], "properties": {"reference_id": {"type": "string"}, "matched_reference_hash": {"type": "string"}}}
+    }
+  ]
+}
