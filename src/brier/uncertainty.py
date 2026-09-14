@@ -9,6 +9,7 @@ weights, forecasts, or ledger state.
 from __future__ import annotations
 
 from math import fsum, isfinite
+import re
 from typing import Any
 
 SCHEMA = "brier.interval.report.v0"
@@ -16,6 +17,7 @@ SPECIALIST = "abx.brier"
 DISPLAY = "Trutina"
 RNG_VERSION = "TRUTINA_LCG32_V1"
 MAX_CASE_DRAWS = 20_000_000
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 class _LCG32:
@@ -31,7 +33,6 @@ class _LCG32:
     def index(self, n: int) -> int:
         if n <= 0:
             raise ValueError("empty population")
-        # Multiply-high avoids modulo bias for a uniform 32-bit source.
         return (self.next_u32() * n) >> 32
 
 
@@ -183,6 +184,16 @@ def _linear_quantile(values: list[float], probability: float) -> float:
     return ordered[lower] * (1.0 - fraction) + ordered[upper] * fraction
 
 
+def _is_degenerate(rows: list[dict[str, Any]], estimand: str) -> bool:
+    if estimand == "BRIER_MEAN":
+        return len({row["model_loss"] for row in rows}) < 2
+    if estimand == "PAIRED_DELTA":
+        return len({row["model_loss"] - row["reference_loss"] for row in rows}) < 2
+    if estimand == "BSS":
+        return len({(row["model_loss"], row["reference_loss"]) for row in rows}) < 2
+    return True
+
+
 def estimate_interval(request: Any, records: Any) -> dict[str, Any]:
     """Estimate a registered percentile interval or return an explicit unavailable report."""
     if not isinstance(request, dict):
@@ -196,14 +207,18 @@ def estimate_interval(request: Any, records: Any) -> dict[str, Any]:
         return _unavailable(request, "SAMPLING_DESIGN_UNKNOWN")
     if request.get("schema") != "brier.interval.request.v0" or request.get("specialist") != SPECIALIST or request.get("display") != DISPLAY:
         return _unavailable(request, "INVALID_DESIGN")
+    if not isinstance(request.get("manifest_hash"), str) or _SHA256.fullmatch(request["manifest_hash"]) is None:
+        return _unavailable(request, "INVALID_DESIGN")
     if request.get("rng_version") != RNG_VERSION:
         return _unavailable(request, "INVALID_DESIGN")
     if type(request.get("seed")) is not int or request["seed"] < 0:
         return _unavailable(request, "INVALID_DESIGN")
-    if type(request.get("replicates")) is not int or request["replicates"] <= 0:
+    if type(request.get("replicates")) is not int or not 0 < request["replicates"] <= 100_000:
         return _unavailable(request, "INVALID_DESIGN")
     confidence = request.get("confidence_level")
     if type(confidence) not in (int, float) or not 0 < float(confidence) < 1:
+        return _unavailable(request, "INVALID_DESIGN")
+    if request.get("weight_design") not in {"EQUAL_FIXED", "OUTCOME_INDEPENDENT_FIXED"}:
         return _unavailable(request, "INVALID_DESIGN")
 
     method = request.get("method")
@@ -213,7 +228,7 @@ def estimate_interval(request: Any, records: Any) -> dict[str, Any]:
         if assumption != "IID" or unit != "CASE" or request.get("cluster_field") is not None or request.get("block_length") is not None:
             return _unavailable(request, "INVALID_DESIGN")
     elif method == "CLUSTER_PERCENTILE_BOOTSTRAP_V1":
-        if assumption != "INDEPENDENT_CLUSTERS" or unit != "CLUSTER" or not isinstance(request.get("cluster_field"), str) or request.get("block_length") is not None:
+        if assumption != "INDEPENDENT_CLUSTERS" or unit != "CLUSTER" or not isinstance(request.get("cluster_field"), str) or not request["cluster_field"] or request.get("block_length") is not None:
             return _unavailable(request, "INVALID_DESIGN")
     elif method == "MOVING_BLOCK_PERCENTILE_BOOTSTRAP_V1":
         if assumption != "APPROX_STATIONARY_SERIAL" or unit != "MOVING_BLOCK" or type(request.get("block_length")) is not int or request["block_length"] <= 0 or request.get("cluster_field") is not None:
@@ -225,7 +240,11 @@ def estimate_interval(request: Any, records: Any) -> dict[str, Any]:
     if estimand not in {"BRIER_MEAN", "PAIRED_DELTA", "BSS"}:
         return _unavailable(request, "INVALID_DESIGN")
     if estimand in {"PAIRED_DELTA", "BSS"}:
-        if not isinstance(request.get("reference_id"), str) or not request["reference_id"] or not isinstance(request.get("matched_reference_hash"), str):
+        reference_id = request.get("reference_id")
+        reference_hash = request.get("matched_reference_hash")
+        if not isinstance(reference_id, str) or not reference_id:
+            return _unavailable(request, "INVALID_DESIGN")
+        if not isinstance(reference_hash, str) or _SHA256.fullmatch(reference_hash) is None:
             return _unavailable(request, "INVALID_DESIGN")
 
     try:
@@ -242,16 +261,13 @@ def estimate_interval(request: Any, records: Any) -> dict[str, Any]:
             return _unavailable(request, "DEGENERATE_SAMPLE")
     if method == "MOVING_BLOCK_PERCENTILE_BOOTSTRAP_V1" and request["block_length"] > len(checked):
         return _unavailable(request, "INVALID_DESIGN")
-
-    point_values = [row["model_loss"] for row in checked]
-    if estimand == "PAIRED_DELTA":
-        point_values = [row["model_loss"] - row["reference_loss"] for row in checked]
-    if len(set(point_values)) < 2:
+    if _is_degenerate(checked, estimand):
         return _unavailable(request, "DEGENERATE_SAMPLE")
 
     draws_per_rep = len(checked)
     if method == "CLUSTER_PERCENTILE_BOOTSTRAP_V1":
-        draws_per_rep = sum(len(unit_rows) for unit_rows in units or [])
+        assert units is not None
+        draws_per_rep = len(units) * max(len(unit_rows) for unit_rows in units)
     if request["replicates"] * draws_per_rep > MAX_CASE_DRAWS:
         return _unavailable(request, "RESOURCE_LIMIT")
 
@@ -274,7 +290,6 @@ def estimate_interval(request: Any, records: Any) -> dict[str, Any]:
         values.append(value)
 
     if estimand == "BSS" and zero_reference:
-        # Zero-reference replicates are never silently dropped for BSS.
         return _unavailable(request, "ZERO_REFERENCE_REPLICATE", valid=len(values), zero_ref=zero_reference)
     if not values:
         return _unavailable(request, "DEGENERATE_SAMPLE", zero_ref=zero_reference)
