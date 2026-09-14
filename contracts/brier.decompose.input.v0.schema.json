@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abraxas.local/contracts/trutina/brier.decompose.input.v0.schema.json",
+  "title": "brier.decompose.input.v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "specialist", "display", "mode", "manifest", "method"],
+  "properties": {
+    "schema": {"const": "brier.decompose.input.v0"},
+    "specialist": {"const": "abx.brier"},
+    "display": {"const": "Trutina"},
+    "mode": {"const": "DECOMPOSE"},
+    "manifest": {"type": "object"},
+    "method": {"enum": ["MURPHY_EXACT_V1", "MURPHY_BINNED_V1"]},
+    "bin_edges": {
+      "type": ["array", "null"],
+      "items": {"type": "number", "minimum": 0, "maximum": 1},
+      "minItems": 2
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"method": {"const": "MURPHY_EXACT_V1"}}},
+      "then": {"properties": {"bin_edges": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"method": {"const": "MURPHY_BINNED_V1"}}},
+      "then": {"required": ["bin_edges"], "properties": {"bin_edges": {"type": "array"}}}
+    }
+  ]
+}
