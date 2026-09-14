@@ -9,15 +9,18 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from math import fsum, isfinite
+import re
 from typing import Any
 
 from .core import compute_atomic_brier
 
 SCHEMA = "brier.batch.report.v0"
+INPUT_SCHEMA = "brier.batch.input.v0"
 SPECIALIST = "abx.brier"
 DISPLAY = "Trutina"
 FORMULA = "BRIER_BINARY_V1"
 SCALE = "binary_0_1"
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 class BatchContractError(ValueError):
@@ -104,15 +107,19 @@ def _validate_manifest_header(manifest: Any) -> dict[str, Any]:
     if not isinstance(manifest, dict):
         raise BatchContractError("INVALID_MEMBER")
     required = {
-        "manifest_hash", "corpus_ref", "snapshot_ref", "snapshot_as_of",
-        "settlement_cutoff", "issued_window", "members", "event_definition",
-        "horizon", "member_order", "weight_policy",
+        "schema", "specialist", "display", "mode", "manifest_hash", "corpus_ref",
+        "snapshot_ref", "snapshot_as_of", "settlement_cutoff", "issued_window",
+        "members", "event_definition", "horizon", "member_order", "weight_policy",
     }
     if not required.issubset(manifest):
         raise BatchContractError("CUTOFF_SNAPSHOT_REQUIRED")
+    if manifest.get("schema") != INPUT_SCHEMA or manifest.get("specialist") != SPECIALIST or manifest.get("display") != DISPLAY or manifest.get("mode") != "BATCH":
+        raise BatchContractError("INVALID_MEMBER")
+    if not isinstance(manifest["manifest_hash"], str) or _SHA256.fullmatch(manifest["manifest_hash"]) is None:
+        raise BatchContractError("INVALID_MEMBER")
     if not isinstance(manifest["members"], list):
         raise BatchContractError("INVALID_MEMBER")
-    if not all(_nonblank(manifest[k]) for k in ("manifest_hash", "corpus_ref", "snapshot_ref", "event_definition", "horizon", "member_order", "weight_policy")):
+    if not all(_nonblank(manifest[k]) for k in ("corpus_ref", "snapshot_ref", "event_definition", "horizon", "member_order", "weight_policy")):
         raise BatchContractError("INVALID_MEMBER")
     window = manifest["issued_window"]
     if not isinstance(window, dict) or set(window) != {"start", "end"}:
@@ -128,18 +135,8 @@ def _validate_manifest_header(manifest: Any) -> dict[str, Any]:
 
 
 def aggregate_batch(manifest: Any) -> dict[str, Any]:
-    """Validate a T02 manifest and compute the T03 weighted Brier report.
-
-    The caller is expected to provide the registered T02 shape. Cross-field
-    semantics are enforced here. Any semantic defect fails the entire request.
-    """
-    try:
-        times = _validate_manifest_header(manifest)
-    except BatchContractError:
-        # A structurally incomplete request cannot produce a valid registered
-        # batch report because the report requires immutable linkage fields.
-        raise
-
+    """Validate a T02 manifest and compute the T03 weighted Brier report."""
+    times = _validate_manifest_header(manifest)
     report = _base_report(manifest)
     if not manifest["members"]:
         report["reasons"] = ["EMPTY_COHORT"]
@@ -228,7 +225,6 @@ def aggregate_batch(manifest: Any) -> dict[str, Any]:
         report["reasons"] = ["EMPTY_COHORT"]
         return report
 
-    # Deterministic case order before stable summation.
     scored.sort(key=lambda item: item[0])
     weights = [item[1] for item in scored]
     weight_sum = fsum(weights)
