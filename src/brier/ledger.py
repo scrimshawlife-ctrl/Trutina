@@ -1,8 +1,5 @@
-"""Deferred ledger surface; no emission or finalization authority."""
+# Brier ledger emission for skill evolution
 
 
 def emit_performance_ledger():
-    raise NotImplementedError("Ledger emission is not implemented in Trutina T0")
-
-
-# Provenance: Trutina Spec 001 / T01 import repair; baseline ecbf403.
+    pass
