@@ -21,3 +21,7 @@ Does not train. Does not Hub. Does not replace `outcome_brier`.
 pip install -e ".[dev]"
 pytest -q
 ```
+
+## Shared research program (candidate)
+
+[Trutina participation in persistent-agent research](specs/PERSISTENT-AGENT-PROGRAM.md) maps this component into ABX-NOEMA-REP-001. Advisory specification only; existing contracts and gates remain authoritative.
