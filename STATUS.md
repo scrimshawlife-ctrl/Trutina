@@ -24,3 +24,5 @@
 | Jev DECOMPOSE Jevals sidecar (docs) | `docs/receipts/20260918-jev-decompose-jevals-sidecar.md` (2026-09-18 PT; thin 6/6 match; closes BATCH SKIP_DECOMPOSE) |
 | Jev narrative calibration meta-judge sidecar (docs) | `docs/receipts/20260918-jev-narrative-judge-sidecar.md` (2026-09-18 PT; synthetic_eval corpus; out-of-tree 7/7 hint_match) |
 | Jev live producer narrative corpus sidecar (docs) | `docs/receipts/20260918-jev-live-producer-corpus-sidecar.md` (2026-09-18 PT; external_public_observed LANDED 6/6; Zero State Teleo/Hyperlex still NOT_COMPUTABLE/ABSENT) |
+| Teleo corpus fill (docs) | `docs/receipts/20260919-teleo-corpus-and-p2-forward.md` (2026-09-19 PT; Batch A 5 + Batch B 9 + HF 20 = 34 labeled; ZS operator-settled still empty) |
+| Teleo P2 forward mint (docs) | `docs/receipts/20260919-teleo-corpus-and-p2-forward.md` (2026-09-19 PT; protocol + tools + skill LANDED; first real ZS claim gated; parked) |
