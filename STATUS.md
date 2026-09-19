@@ -18,3 +18,4 @@
 | Bind receipt | `specs/BIND.md` |
 | Repo | https://github.com/scrimshawlife-ctrl/Trutina |
 | Jev SCORE Jevals sidecar (docs) | `docs/receipts/20260918-jev-score-jevals-sidecar.md` (2026-09-18 PT; out-of-tree 6/6 live) |
+| Jev GATE_ADVISORY Choice sidecar (docs) | `docs/receipts/20260918-jev-gate-advisory-sidecar.md` (2026-09-18 PT; out-of-tree Choice live) |
