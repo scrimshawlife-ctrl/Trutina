@@ -1,4 +1,5 @@
 from decimal import Decimal
+import math
 
 from brier.score import score
 
@@ -21,7 +22,7 @@ def test_score_true_08() -> None:
     assert pkt["display"] == "Trutina"
     assert pkt["mode"] == "SCORE"
     assert pkt["formula"] == "BRIER_BINARY_V1"
-    assert pkt["brier"] == 0.04
+    assert math.isclose(pkt["brier"], 0.04, abs_tol=1e-9)
     assert pkt["honesty"] == "OBSERVED"
     assert pkt["forecast_eligible"] is False
     assert pkt["can_promote"] is False
@@ -32,7 +33,7 @@ def test_score_true_08() -> None:
 
 def test_score_false_08() -> None:
     pkt = score(_settled(0.8, 0, settlement="FALSE"))
-    assert pkt["brier"] == 0.64
+    assert math.isclose(pkt["brier"], 0.64, abs_tol=1e-9)
 
 
 def test_forecast_request_refused() -> None:
