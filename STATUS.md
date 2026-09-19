@@ -21,3 +21,4 @@
 | Jev GATE_ADVISORY Choice sidecar (docs) | `docs/receipts/20260918-jev-gate-advisory-sidecar.md` (2026-09-18 PT; out-of-tree Choice live) |
 | Jev uncertainty sampling-design Choice sidecar (docs) | `docs/receipts/20260918-jev-uncertainty-design-sidecar.md` (2026-09-18 PT; out-of-tree Choice live; 5/5 hint_match) |
 | Jev BATCH Jevals sidecar (docs) | `docs/receipts/20260918-jev-batch-jevals-sidecar.md` (2026-09-18 PT; out-of-tree 6/6 match, SKIP_DECOMPOSE) |
+| Jev narrative calibration meta-judge sidecar (docs) | `docs/receipts/20260918-jev-narrative-judge-sidecar.md` (2026-09-18 PT; synthetic_eval corpus; out-of-tree 7/7 hint_match; live corpus WATCH) |
