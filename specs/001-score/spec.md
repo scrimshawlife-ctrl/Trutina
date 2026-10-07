@@ -116,4 +116,14 @@ NOT_COMPUTABLE: external receipt authenticity and live Notion parity. Current wr
 
 Implement T01 against these fixtures in the existing SCORE cycle, without opening new modes or changing packet schema.
 
+## RESOLVED CONFLICTS WITH specs/000-trutina-spine
+
+Where this spec disagrees with specs/000-trutina-spine, the spine governs. Three conflicts were resolved 2026-10-07:
+
+1. **key-absent `payload_class` → SPECIALIST_LANE_VIOLATION** (not NOT_COMPUTABLE as spec-001:84 states). Per specs/000-trutina-spine/data-model.md:30 and tests/test_score.py:54/59.
+
+2. **float y (0.0 / 1.0) → REFUSED** (not accepted-and-scored as spec-001:36 states). Per tests/test_score.py:98-100 (`test_float_outcome_refused`). The spine's strict y validation (int 0/1 only) supersedes spec-001's permissive "0.0/1.0 valid".
+
+3. **mode "" and "UNKNOWN" → normalized to SCORE in refusal packet** (not preserved-raw as tests/test_score.py previously asserted). The closed schema at contracts/brier.score.v0.schema.json requires mode in a fixed enum; preserving the raw value emits a packet the schema rejects, so it cannot be emitted at all. spec-001:45 independently requires this normalization. score.py now normalizes invalid string modes to SCORE exactly as it already does for non-string modes.
+
 Provenance: scrimshawlife-ctrl/Trutina + constitution.md + specs/BIND.md (designated Spec 009/010 references; live parity unverified) + Hash: 2724c9baf6e5837441f65e569347c8e713a2a32e (observed repository baseline).

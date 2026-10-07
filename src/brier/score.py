@@ -112,8 +112,10 @@ def score(atom: dict[str, Any]) -> dict[str, Any]:
         if raw_mode in STUB_MODES:
             return _base(mode=raw_mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
         if raw_mode not in LIVE_MODES:
-            # Invalid string mode ("", "UNKNOWN", etc.): preserved per test_score.py
-            return _base(mode=raw_mode, brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
+            # Invalid string mode ("", "UNKNOWN", etc.): normalized to SCORE in refusal packet
+            # per contracts/brier.score.v0.schema.json mode enum and spec-001:45;
+            # preserving the raw value emits a packet the closed schema rejects.
+            return _base(mode="SCORE", brier=None, honesty="NOT_COMPUTABLE", failure="NOT_COMPUTABLE", corpus_ref=ref)
         mode = raw_mode
     else:
         mode = "SCORE"

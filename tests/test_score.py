@@ -114,15 +114,19 @@ def test_batch_stub() -> None:
     assert pkt["brier"] is None
 
 
-def test_unknown_mode_is_preserved_when_refused() -> None:
+def test_unknown_mode_normalized_to_score_in_refusal() -> None:
+    # Invalid string modes normalized to SCORE per contracts/brier.score.v0.schema.json
+    # mode enum and spec-001:45; preserving raw value emits a packet the closed schema rejects.
     pkt = score({**_settled(0.8, 1), "mode": "UNKNOWN"})
-    assert pkt["mode"] == "UNKNOWN"
+    assert pkt["mode"] == "SCORE"
     assert pkt["failure"] == "NOT_COMPUTABLE"
     assert pkt["brier"] is None
 
 
-def test_empty_mode_is_preserved_when_refused() -> None:
+def test_empty_mode_normalized_to_score_in_refusal() -> None:
+    # Invalid string modes normalized to SCORE per contracts/brier.score.v0.schema.json
+    # mode enum and spec-001:45; preserving raw value emits a packet the closed schema rejects.
     pkt = score({**_settled(0.8, 1), "mode": ""})
-    assert pkt["mode"] == ""
+    assert pkt["mode"] == "SCORE"
     assert pkt["failure"] == "NOT_COMPUTABLE"
     assert pkt["brier"] is None

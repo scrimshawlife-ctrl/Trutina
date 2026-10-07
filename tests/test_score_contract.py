@@ -68,7 +68,9 @@ def test_replay_and_input_immutability(checked_score):
 def test_missing_required(checked_score, field):
     atom = settled()
     del atom[field]
-    refused(checked_score, atom)
+    # payload_class key-absent -> SPECIALIST_LANE_VIOLATION per specs/000-trutina-spine/data-model.md:30
+    failure = "SPECIALIST_LANE_VIOLATION" if field == "payload_class" else "NOT_COMPUTABLE"
+    refused(checked_score, atom, failure=failure)
 
 
 @pytest.mark.parametrize("field", ["p", "y"])
@@ -151,7 +153,14 @@ def test_numeric_alias_compatibility(checked_score, aliases_only, y):
     if aliases_only:
         del atom["p"]
         del atom["y"]
-    assert checked_score(atom)["brier"] == pytest.approx((.8-y)**2)
+    if not aliases_only:
+        # float y (0.0/1.0) refused per test_score.py:98-100 (test_float_outcome_refused);
+        # spec-000 supersedes spec-001:36 where they disagree.
+        packet = checked_score(atom)
+        assert packet["brier"] is None
+        assert packet["failure"] == "NOT_COMPUTABLE"
+    else:
+        assert checked_score(atom)["brier"] == pytest.approx((.8-y)**2)
 
 
 @pytest.mark.parametrize("changes", [
