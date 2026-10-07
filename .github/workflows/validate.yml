@@ -1,0 +1,35 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # 3.10 is the floor declared in pyproject.toml, so it is tested first.
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e ".[dev]"
+
+      # This repository had tests and no workflow, so nothing ever ran them. They were last touched
+      # 2026-09-13 and the scoring source changed on 2026-09-15 (7de239b, "resolve: spec-000 score
+      # guards onto current main"), which rewrote src/brier/score.py and updated tests/test_score.py but
+      # not tests/test_score_contract.py. That drift has therefore never been surfaced. This job is what
+      # makes it visible -- it is expected to be red until the contract test is reconciled with the
+      # current spec (see KANBAN.md).
+      - name: Test
+        run: python -m pytest tests/ -q

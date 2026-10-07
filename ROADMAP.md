@@ -18,6 +18,8 @@ _Last reviewed: 2026-10-07._
 
 - Brier scoring with honest uncertainty output.
 - A count of ten tests over the scoring surface.
+- **CI on every push** (3.10 / 3.11 / 3.12). The workflow was the prerequisite the badge column could not
+  paper over; adding it immediately surfaced a drift nothing had caught (see below).
 
 ## In progress
 
@@ -25,10 +27,11 @@ _Last reviewed: 2026-10-07._
 
 ## Next
 
+- **Reconcile `tests/test_score_contract.py` with the current spec.** It asserts the pre-2026-09-15 contract
+  and fails against the current code (see KANBAN.md). The spec `specs/001-score/` documents the newer
+  behaviour, so the test is the stale side -- but that call belongs to the author, not to a passer-by.
 - Additional calibration metrics **only** where a consumer needs a specific one.
 
 ## Not planned
 
-- **A CI badge.** This repository has no workflow, so a build badge would be decorative. Adding the workflow
-  comes first.
 - **Inventing confidence.** Trutina scores what it is given; a default confidence would defeat its purpose.
