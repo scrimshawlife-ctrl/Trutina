@@ -3,6 +3,10 @@ import json
 from pathlib import Path
 
 import pytest
+
+DEFERRED_MODE_REASON = (
+    'the spec defers this mode to a later cycle -- specs/001-score/spec.md:99-105 lists BATCH and DECOMPOSE under "Later modes (not this cycle)" and engineering.md:7 says "BATCH / DECOMPOSE / advisory modes stub NOT_COMPUTABLE". This test asserts dispatch to a mode handler that does not exist yet. Remove the marker when dispatch is implemented.'
+)
 from jsonschema import Draft202012Validator, FormatChecker
 
 from brier.batch import aggregate_batch, compare_reference
@@ -193,6 +197,7 @@ def test_a27_void_and_unsettled_are_excluded_but_invalid_variant_refused():
     assert checked(invalid)["reasons"] == ["INVALID_MEMBER"]
 
 
+@pytest.mark.xfail(strict=True, reason=DEFERRED_MODE_REASON)
 def test_a28_asof_snapshot_counts_and_runtime_dispatch():
     payload = manifest([settled("a", 0.8, 1), void(), unsettled()])
     report = score(payload)

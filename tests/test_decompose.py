@@ -2,6 +2,10 @@ import json
 from pathlib import Path
 
 import pytest
+
+DEFERRED_MODE_REASON = (
+    'the spec defers this mode to a later cycle -- specs/001-score/spec.md:99-105 lists BATCH and DECOMPOSE under "Later modes (not this cycle)" and engineering.md:7 says "BATCH / DECOMPOSE / advisory modes stub NOT_COMPUTABLE". This test asserts dispatch to a mode handler that does not exist yet. Remove the marker when dispatch is implemented.'
+)
 from jsonschema import Draft202012Validator
 
 from brier.decompose import (
@@ -129,6 +133,7 @@ def test_a20_elementary_murphy_integral_matches_binary_brier():
     assert murphy_elementary_integral(0.8, 0) == pytest.approx(0.64)
 
 
+@pytest.mark.xfail(strict=True, reason=DEFERRED_MODE_REASON)
 def test_public_dispatch_exact_and_binned_reports():
     cohort = manifest([
         settled("a", 0.25, 0),
@@ -155,6 +160,7 @@ def test_public_dispatch_exact_and_binned_reports():
     assert binned["status"] == "COMPUTABLE"
 
 
+@pytest.mark.xfail(strict=True, reason=DEFERRED_MODE_REASON)
 def test_registered_partial_manifest_fails_closed_as_decompose_report():
     request = {
         "schema": "brier.decompose.input.v0",

@@ -74,6 +74,47 @@ The remaining five code classes are all spec-cited and unambiguous in direction 
 than score or crash — but they are behavioural changes to the scoring path, so they are recorded rather than
 applied. The three test-stale cases are deferred by the spec's own words and should be marked in place.
 
+### Fixed this session: 70 -> 5 failed, 203 passed, 3 xfailed
+
+Five of the six diagnosed code defects were repaired in `src/brier/score.py` (+161/-29), in two measured passes:
+**67 -> 50 -> 8 -> 5 failed**, the last step being the three spec-deferred tests marked in place.
+
+`sanitize` and type-guard work: `mode` and `payload_class` are isinstance-checked before any set membership
+(previously an unhashable value raised `TypeError` instead of refusing); `p` is type-checked before `float()`
+so a boolean or numeric string can no longer be scored; `corpus_ref` is sanitized on every return path;
+non-string modes normalize to `SCORE`; `settled_at`, `settled_by`, aliases and the top-level object type are
+now validated per spec.
+
+**Three tests marked xfail, by name, with the citation** -- `test_public_dispatch_exact_and_binned_reports` and
+`test_registered_partial_manifest_fails_closed_as_decompose_report` in test_decompose.py, and
+`test_a28_asof_snapshot_counts_and_runtime_dispatch` in test_batch.py, each `strict=True` with the reason
+"the spec defers this mode to a later cycle ... Remove the marker when dispatch is implemented." Deferred is
+not deleted, and `strict=True` means the marker fails the run if the test ever starts passing.
+
+An over-broad first attempt at this marked 16 tests instead of 3 and pushed the count to 18 failed; it was
+reverted and the three were identified by name from the actual failures instead of by pattern.
+
+### The five that remain are a spec-versus-newer-test conflict, not a defect
+
+All five are in tests/test_score_contract.py and each disagrees with tests/test_score.py, which arrived with the
+same commit (7de239b) that rewrote score.py:
+
+| Failing contract test | The spec says | test_score.py says |
+|---|---|---|
+| `test_missing_required[payload_class]` | spec:84 -- missing payload_class or settlement -> NOT_COMPUTABLE | SPECIALIST_LANE_VIOLATION |
+| `test_invalid_mode[]` | spec:45 -- invalid/unknown mode is represented as SCORE in the refusal packet | preserves the raw `''` |
+| `test_invalid_mode[UNKNOWN]` | spec:45 -- as above | preserves the raw `'UNKNOWN'` |
+| `test_numeric_alias_compatibility[0.0-False]` | spec:36 -- "0.0/1.0 valid" | refuses float y |
+| `test_numeric_alias_compatibility[1.0-False]` | spec:36 -- as above | refuses float y |
+
+The current code follows **test_score.py** on all five, which is why the contract tests fail. Two artifacts (the
+spec and the older contract test) agree with each other and disagree with the newer test; the newer test
+arrived with the rewrite that the spec predates. Flipping the code to the spec would move the five failures to
+the other file rather than clear them, so it is left as a decision: either the spec is updated to record the
+newer behaviour, or `test_score.py` is corrected to the spec. Both are the author's call.
+
+Also added: a `.gitignore`, absent until now, so test runs stop leaving a dozen untracked `.pyc` files.
+
 ## Done
 
 - Brier scoring with honest uncertainty output — the core surface this library exists for.
