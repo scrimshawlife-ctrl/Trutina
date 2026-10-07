@@ -2,4 +2,6 @@
 
 
 def emit_performance_ledger():
-    pass
+    raise NotImplementedError(
+        "emit_performance_ledger is a deferred export and is not implemented"
+    )

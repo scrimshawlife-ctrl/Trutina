@@ -2,8 +2,12 @@
 
 
 def to_brier_score_packet():
-    pass
+    raise NotImplementedError(
+        "to_brier_score_packet is a deferred export and is not implemented"
+    )
 
 
 def to_brier_ledger_entry():
-    pass
+    raise NotImplementedError(
+        "to_brier_ledger_entry is a deferred export and is not implemented"
+    )

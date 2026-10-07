@@ -53,6 +53,27 @@ real defects that the closed schemas catch precisely because they are closed. Th
 refusal-reason cases need the author; the 14 + 3 + 2 + 4 + 4 above do not obviously do so, and are worth
 reading before deciding which side moves.
 
+### Research verdicts on all seven failure classes
+
+Each class was settled against `specs/001-score/` and `contracts/*.json` on one side and the exact code line on
+the other. Six are **code defects**; one is a **stale test**.
+
+| Class | Count | Verdict | Code | Spec |
+|---|---|---|---|---|
+| `assert N.N is None` | 28 | **code wrong** | `score.py:79` — `compute_atomic_brier(float(p), y_int)` has no type guard, so `float(True)==1.0` and `float('1')==1.0` score a boolean or a string instead of refusing it. `score.py:41-42` also silently defaults `mode=None` to SCORE. | spec:34 (null/empty/non-string mode invalid), :36 (booleans and strings rejected for p/y), :85 (fractional/string/boolean p/y → NOT_COMPUTABLE) |
+| `{} / [] is not of type 'string','null'` | 14 | **code wrong** | all ten `_base()` calls in `score()` pass `corpus_ref` through raw, so a list or dict is echoed verbatim. | spec:41 (corpus_ref nonempty if string; malformed refused and never echoed) |
+| `'SPECIALIST_LANE_VIOLATION' == 'NOT_COMPUTABLE'` | 4 | **code wrong** | `score.py:54-55` falls through to SPECIALIST_LANE_VIOLATION for a missing or non-string `payload_class`; that reason is reserved for recognised non-settled atoms. | spec:45 and :84 (missing/non-string payload_class → NOT_COMPUTABLE), :80 (named atoms → SPECIALIST_LANE_VIOLATION) |
+| `DID NOT RAISE NotImplementedError` | 3 | **FIXED this session** | `compat/abraxas.py:4,8` and `ledger.py:4` were bare `pass` — deferred exports returning `None` instead of refusing. They now raise. | `engineering.md:16` — "They now expose explicit NotImplementedError stubs" |
+| `cannot use 'list'/'dict' as a set element` | 4 | **code wrong** | `score.py:45` does `mode in STUB_MODES` and `:52` does `payload in OTHER_ATOMS` without an isinstance check, so an unhashable value raises instead of refusing. | spec:34, :45 (non-string mode/payload_class → refusal, not an exception) |
+| `True / N is not one of [SCORE, BATCH, ...]` | 4 | **code wrong** | `score.py:47-48` returns the refusal carrying the raw invalid `mode`, which the closed schema rejects. | spec:45 — "Invalid/unknown mode is represented as SCORE in the refusal packet" |
+| `Additional properties ... were unexpected` | 3 | **test stale** | `tests/test_decompose.py:148,168` and `tests/test_batch.py:198` expect mode dispatch to decompose/batch handlers. The code correctly returns a score.v0 refusal for stub modes (`score.py:45-46`). | spec:99-105 lists these as "Later modes (not this cycle)"; `engineering.md:7` — "BATCH / DECOMPOSE / advisory modes stub NOT_COMPUTABLE" |
+
+**Measured after the stub fix: 70 → 67 failed, 141 → 144 passed.**
+
+The remaining five code classes are all spec-cited and unambiguous in direction — the code must refuse rather
+than score or crash — but they are behavioural changes to the scoring path, so they are recorded rather than
+applied. The three test-stale cases are deferred by the spec's own words and should be marked in place.
+
 ## Done
 
 - Brier scoring with honest uncertainty output — the core surface this library exists for.
