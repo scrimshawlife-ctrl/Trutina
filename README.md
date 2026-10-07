@@ -1,3 +1,11 @@
+<p align="center"><img src="assets/hero.svg" alt="Trutina — Calibration scoring" width="860"></p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776ab?logo=python&logoColor=white" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/license-MIT-22c55e" alt="MIT">
+  <img src="https://img.shields.io/badge/status-library-047857" alt="status">
+</p>
+
 # Trutina
 
 SHADOW calibration specialist for the Abraxas stack. Assay, not minds.
